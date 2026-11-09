@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#faf9f6"><meta name="description" content="Practical EnvGuard CI tutorials for Python developers: first diagnosis, interpreter failures, GitLab, GitHub Actions, wheel verification, and repair experiments.">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../styles.css"><script src="../app.js" defer></script>
+<title>Worked Tutorials — EnvGuard CI</title></head>
+<body><a class="skip-link" href="#main">Skip to tutorials</a>
+<header class="masthead"><div class="masthead-inner">
+<a class="wordmark" href="../"><span class="symbol">E<span class="symbol-dot">·</span>G</span><span class="wordmark-name">EnvGuard <span>CI</span></span></a>
+<nav aria-label="Main navigation"><a href="../">Home</a><a href="../docs/">Documentation</a><a href="./" aria-current="page">Tutorials</a><a href="https://github.com/zgcharaf/ENV-Guard" rel="noopener noreferrer">GitHub ↗</a></nav></div></header>
+<div class="doc-frame" id="main">
+<aside class="toc" aria-label="Tutorial contents">
+<h2>Worked exercises</h2>
+<a href="#before-starting">Prerequisites</a>
+<a href="#tutorial-local"><span class="toc-number">1.</span> Local diagnosis</a>
+<a href="#tutorial-interpreter"><span class="toc-number">2.</span> Wrong interpreter</a>
+<a href="#tutorial-gitlab"><span class="toc-number">3.</span> GitLab CI</a>
+<a href="#tutorial-github"><span class="toc-number">4.</span> GitHub Actions</a>
+<a href="#tutorial-wheel"><span class="toc-number">5.</span> Wheel integrity</a>
+<a href="#tutorial-repair"><span class="toc-number">6.</span> Verify a correction</a>
+<a href="#tutorial-reading"><span class="toc-number">7.</span> Reading the evidence</a>
+<div class="toc-group">Reference</div>
+<a href="../docs/">Technical manual →</a>
+<a href="https://github.com/zgcharaf/ENV-Guard/tree/main/examples">Executable examples ↗</a>
+</aside>
+<article class="doc-article">
+<div class="doc-meta">Laboratory notebook · EnvGuard CI 1.0.0rc2 · Python 3.11+</div>
+<h1>Worked tutorials</h1>
+<p class="doc-lead">Seven reproducible exercises, moving from a local interpreter snapshot to evidence-led CI incident analysis and bounded correction experiments.</p>
+<div class="abstract"><span class="abstract-title">How to use this guide</span>
+<p>Each exercise distinguishes its expected observation from what that observation proves. Start with the local tutorial. The GitLab and GitHub exercises use public example configurations that must be adapted to your application's build system and access controls. Use only synthetic or approved code in the repair and container exercises.</p></div>
+
+<section id="before-starting">
+<h2>Prerequisites</h2>
+<p>Clone the current repository and install it from source. This is not a PyPI installation instruction.</p>
+<div class="code-example"><div class="code-caption"><span>Linux / macOS / WSL2</span><button type="button" class="copy">Copy</button></div><pre><code>git clone https://github.com/zgcharaf/ENV-Guard.git
+cd ENV-Guard
+python -m pip install -e .
+envguard-ci --version</code></pre></div>
+<div class="code-example"><div class="code-caption"><span>Windows PowerShell</span><button type="button" class="copy">Copy</button></div><pre><code>git clone https://github.com/zgcharaf/ENV-Guard.git
+cd ENV-Guard
+py -m pip install -e .
+envguard-ci --version</code></pre></div>
+<p>The CLI should report <code>envguard-ci 1.0.0rc2</code> for this release. If you are using a later checkout, trust the installed <code>--version</code> result and inspect its help text for changes.</p>
+<div class="note warning"><p><strong>Safety.</strong> <code>ci-run</code> and <code>investigate</code> execute your command. <code>verify-interpreter</code> executes an application twice after explicit opt-in. These are not secure sandboxes. Avoid production credentials and data in demonstrations.</p></div>
+</section>
+
+<section id="tutorial-local" class="numbered-tutorial">
+<h2>1. Local environment diagnosis</h2>
+<p><span class="small-label">Objective.</span> Determine which Python environment is active, inspect installed dependencies and generate a machine-readable record.</p>
+<h3>Capture a snapshot</h3>
+<div class="code-example"><div class="code-caption"><span>From the repository root</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci snapshot --project . --out local.json</code></pre></div>
+<p>This creates <code>local.json</code> with runtime, platform, distribution and project information. Without an explicit <code>--python</code> argument, the inspected Python is the one running EnvGuard.</p>
+<h3>Inspect the graph and check requirements</h3>
+<div class="code-example"><div class="code-caption"><span>Diagnose the snapshot</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci doctor --snapshot local.json
+envguard-ci graph --snapshot local.json
+envguard-ci graph --snapshot local.json --scope environment</code></pre></div>
+<p>The second graph command examines all installed distributions, whereas the default view is project-oriented. Optional dependencies whose extras are not selected should not be misreported as broken requirements.</p>
+<h3>Check independently</h3>
+<div class="code-example"><div class="code-caption"><span>Cross-check with pip</span><button type="button" class="copy">Copy</button></div><pre><code>python -m pip check</code></pre></div>
+<p><strong>Expected.</strong> A snapshot file and diagnostic summary. <code>no_local_findings</code> indicates no inconsistency was detected by implemented checks; it does not certify that every import works.</p>
+<p><strong>Next exercise.</strong> In <a href="#tutorial-interpreter">Tutorial 2</a>, a real module import will fail even though the correct environment has the required package.</p>
+</section>
+
+<section id="tutorial-interpreter" class="numbered-tutorial">
+<h2>2. Reproduce a wrong-interpreter failure</h2>
+<p><span class="small-label">Objective.</span> Distinguish an undeclared dependency from the same symptom caused by executing the wrong virtual environment.</p>
+<h3>Run the controlled failure lab</h3>
+<div class="code-example"><div class="code-caption"><span>Platform independent</span><button type="button" class="copy">Copy</button></div><pre><code>python examples/run_failure_demo.py</code></pre></div>
+<p>The script constructs tiny wheels locally, creates disposable virtual environments under <code>lab/.envguard-runs</code>, installs the example package in the intended environment and runs the application with a different Python executable.</p>
+<h3>Inspect the diagnostic files</h3>
+<div class="code-example"><div class="code-caption"><span>Linux / macOS / WSL2</span><button type="button" class="copy">Copy</button></div><pre><code>cat lab/.envguard-runs/demo-ci-report.md
+python -m json.tool lab/.envguard-runs/demo-ci-report.json</code></pre></div>
+<div class="code-example"><div class="code-caption"><span>Windows PowerShell</span><button type="button" class="copy">Copy</button></div><pre><code>Get-Content .\lab\.envguard-runs\demo-ci-report.md
+Get-Content .\lab\.envguard-runs\demo-ci-report.json -Raw</code></pre></div>
+<p><strong>Expected.</strong> The failing command returns nonzero; EnvGuard records <code>WRONG_PYTHON_INTERPRETER</code> when the expected and executed interpreter identities and missing-package evidence support it. The demo runner itself exits zero when those assertions pass.</p>
+<div class="note"><p><strong>Interpretation.</strong> A confirmed direct interpreter mismatch plus the package's presence only in the intended runtime is stronger evidence than the words <code>No module named ...</code> alone.</p></div>
+<h3>Run all supported synthetic cases</h3>
+<div class="code-example"><div class="code-caption"><span>Failure laboratory</span><button type="button" class="copy">Copy</button></div><pre><code>python lab/run_lab.py</code></pre></div>
+<p>On native Windows, Linux-only C++ shared-library tests may be skipped. To run them, use a Linux runner or Docker Desktop in Linux mode; see <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/lab/README.md">lab documentation</a>.</p>
+</section>
+
+<section id="tutorial-gitlab" class="numbered-tutorial">
+<h2>3. Integrate with GitLab CI/CD</h2>
+<p><span class="small-label">Objective.</span> Retain a diagnostic dossier even when a project test fails, and optionally compare it against a successful default-branch snapshot.</p>
+<h3>Prepare a safe project runner</h3>
+<p>Use a private test repository or approved sandbox. Start with a Python project that has <code>requirements.txt</code> and <code>tests/</code>. The example below checks out the EnvGuard source, creates an application virtualenv, instruments test execution and retains diagnostic artifacts. Pin the tool checkout to a reviewed commit for production use instead of relying on a moving <code>main</code> branch.</p>
+<div class="code-example"><div class="code-caption"><span>Adapted .gitlab-ci.yml</span><button type="button" class="copy">Copy</button></div><pre><code>stages: [test]
+
+python:tests:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - git clone --depth 1 https://github.com/zgcharaf/ENV-Guard.git tools/envguard-ci
+    - python -m pip install -e tools/envguard-ci
+    - python -m venv .venv
+    - .venv/bin/python -m pip install -r requirements.txt
+    - |
+      envguard-ci ci-run --project . --python .venv/bin/python \
+        --snapshot-out incident/current.json \
+        --report-out incident/report.json \
+        -- .venv/bin/python -m unittest discover -s tests
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - incident/current.json
+      - incident/report.json
+      - incident/report.md</code></pre></div>
+<p>The runner must have <code>git</code> and network access to the source repository and package index. Test the installation step and your existing tests separately; the sample instruments only execution after dependencies are installed. To capture installer failures as well, wrap that installation with another <code>ci-run</code> invocation and give it distinct report paths.</p>
+<h3>Produce the first healthy baseline</h3>
+<p>For automatic retrieval, the successful default-branch job should upload the snapshot under a stable artifact path, such as <code>envguard-ci.json</code>. Keep its name and job identity consistent across runs. A first or isolated pipeline may have no baseline, which is expected.</p>
+<div class="code-example"><div class="code-caption"><span>Successful snapshot</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci snapshot --project . \
+  --python .venv/bin/python \
+  --out envguard-ci.json</code></pre></div>
+<h3>Use a historical baseline</h3>
+<div class="code-example"><div class="code-caption"><span>GitLab job with authorized artifact access</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci investigate --project . \
+  --python .venv/bin/python \
+  --last-green gitlab \
+  --baseline-ref "$CI_DEFAULT_BRANCH" \
+  --baseline-job "python:tests" \
+  --baseline-artifact envguard-ci.json \
+  --snapshot-out incident/current.json \
+  --report-out incident/report.json \
+  -- .venv/bin/python -m unittest discover -s tests</code></pre></div>
+<p>Historical artifact access depends on GitLab settings and runner permissions. The default <code>CI_JOB_TOKEN</code> may not be authorized; use a protected, narrowly scoped <code>ENVGUARD_GITLAB_READ_TOKEN</code> only if needed. Where no historical baseline is available, EnvGuard records that limitation instead of fabricating a comparison.</p>
+<p><strong>Acceptance check.</strong> Intentionally break a disposable job with the wrong interpreter. Confirm that the job remains failed while GitLab uploads <code>incident/report.json</code> and <code>incident/report.md</code> as artifacts. Do not upload sensitive logs, tokens or production package inventories to public artifacts.</p>
+<p>See the project's <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/.gitlab-ci.yml">own GitLab pipeline</a> and <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/examples/gitlab-ci-snippet.yml">smaller integration snippet</a> for starting configurations.</p>
+</section>
+
+<section id="tutorial-github" class="numbered-tutorial">
+<h2>4. Integrate with GitHub Actions</h2>
+<p><span class="small-label">Objective.</span> Instrument a test job, upload reports even when it fails, and optionally compare it with a prior successful Actions artifact.</p>
+<h3>Add the basic workflow</h3>
+<div class="code-example"><div class="code-caption"><span>.github/workflows/python-envguard.yml</span><button type="button" class="copy">Copy</button></div><pre><code>name: Python diagnostics
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install EnvGuard
+        run: |
+          git clone --depth 1 https://github.com/zgcharaf/ENV-Guard.git tools/envguard-ci
+          python -m pip install -e tools/envguard-ci
+      - name: Install project
+        run: python -m pip install -r requirements.txt
+      - name: Run tests with diagnostics
+        run: |
+          envguard-ci ci-run --project . --python "$(command -v python)" \
+            --snapshot-out current.json \
+            --report-out incident.json \
+            -- python -m unittest discover -s tests
+      - name: Save incident reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: envguard-diagnostics
+          path: |
+            current.json
+            incident.json
+            incident.md
+          if-no-files-found: warn</code></pre></div>
+<p>Review and pin external actions and EnvGuard source revision for security-sensitive pipelines. This example uses a standard Python test layout; adapt the installation and test commands to your project.</p>
+<h3>Optional last-green lookup</h3>
+<p>The read-only fetcher needs a successful workflow run on the target branch with an artifact named <code>envguard-baseline</code> that contains a snapshot named <code>envguard-ci.json</code>. Grant <code>actions: read</code> in the workflow job and pass the GitHub token only to authorized internal runs.</p>
+<div class="code-example"><div class="code-caption"><span>Investigate with GitHub baseline</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci investigate --project . \
+  --python "$(command -v python)" \
+  --last-green github \
+  --github-workflow python-envguard.yml \
+  --baseline-ref main \
+  --github-artifact envguard-baseline \
+  --baseline-artifact envguard-ci.json \
+  --snapshot-out current.json --report-out incident.json \
+  -- python -m unittest discover -s tests</code></pre></div>
+<p>The latest successful workflow artifact might be from a different change than the failing commit's parent. A difference between snapshots is not automatically causal. See the <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/.github/workflows/ci.yml">working project workflow</a> for baseline artifact production and permission details.</p>
+<p><strong>Acceptance check.</strong> Confirm that the source installation and tests succeed on your supported Python versions, that a deliberately failing branch uploads its report, and that baseline retrieval explicitly indicates when an artifact is missing or inaccessible.</p>
+</section>
+
+<section id="tutorial-wheel" class="numbered-tutorial">
+<h2>5. Verify Python wheel integrity</h2>
+<p><span class="small-label">Objective.</span> Check the bytes of a built wheel before distributing it, without importing or executing code during the inspection step.</p>
+<h3>Build a real example wheel</h3>
+<div class="code-example"><div class="code-caption"><span>Local packaging</span><button type="button" class="copy">Copy</button></div><pre><code>python -m pip install build
+python -m build --wheel</code></pre></div>
+<p>This builds the repository's own wheel into <code>dist/</code>. Verify the name shown in the output before copying the command below.</p>
+<h3>Inspect the wheel archive</h3>
+<div class="code-example"><div class="code-caption"><span>Current rc2 artifact</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci inspect-wheel \
+  --wheel dist/envguard_ci-1.0.0rc2-py3-none-any.whl \
+  --out integrity.json</code></pre></div>
+<p>The inspection records the archive hash, internal RECORD checks, potentially native members and tag compatibility information. Compare with a hash from a trusted independent source using <code>--approved-sha256</code> when available.</p>
+<h3>Optional offline container smoke test</h3>
+<p>Only use trusted wheels and a pinned, approved Linux Python image. First pull the image through a permitted workflow and obtain its actual immutable digest. Then verify the wheel in that image:</p>
+<div class="code-example"><div class="code-caption"><span>Example — replace digest and wheelhouse with real values</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci certify-wheel \
+  --wheel dist/envguard_ci-1.0.0rc2-py3-none-any.whl \
+  --image 'python:3.12-slim@sha256:REPLACE_WITH_REAL_64_HEX_DIGEST' \
+  --module envguard_ci \
+  --wheelhouse ./approved-wheels \
+  --out deployment-proof.json</code></pre></div>
+<p>Use a compatible local wheelhouse for any missing dependencies, including <code>packaging</code> when it is not already available in the image. The verifier operates without container network access. A passing import is a <em>smoke check</em>, not a security certification, full deployment validation or guaranteed ABI compatibility.</p>
+</section>
+
+<section id="tutorial-repair" class="numbered-tutorial">
+<h2>6. Verify a proposed interpreter correction</h2>
+<p><span class="small-label">Objective.</span> Move beyond an explanation by recording an actual failing and successful run. This experiment executes application code, so use only a disposable test project.</p>
+<h3>Run the complete local exercise</h3>
+<div class="code-example"><div class="code-caption"><span>Windows, Linux, macOS</span><button type="button" class="copy">Copy</button></div><pre><code>python examples/run_v1_repair_demo.py</code></pre></div>
+<p>The helper creates isolated environments, injects a wrong-interpreter failure and invokes EnvGuard's candidate experiment against the same application module. The demo prints the resulting evidence file path; the default result in this repository is <code>lab/.envguard-runs/v1-repair-proof.json</code>.</p>
+<h3>Inspect the recorded evidence</h3>
+<div class="code-example"><div class="code-caption"><span>Linux / macOS / WSL2</span><button type="button" class="copy">Copy</button></div><pre><code>python -m json.tool lab/.envguard-runs/v1-repair-proof.json</code></pre></div>
+<div class="code-example"><div class="code-caption"><span>Windows PowerShell</span><button type="button" class="copy">Copy</button></div><pre><code>Get-Content .\lab\.envguard-runs\v1-repair-proof.json -Raw</code></pre></div>
+<p><strong>Expected.</strong> <code>original.exit_code</code> is nonzero; <code>candidate.exit_code</code> is zero; <code>status</code> is <code>observed_candidate_succeeds</code>; <code>automatic_changes_made</code> is false. Exact fingerprints will vary by machine.</p>
+<h3>Underlying command</h3>
+<p>In a real disposable project with two distinct pre-created interpreters, the direct verification interface is:</p>
+<div class="code-example"><div class="code-caption"><span>Unix example — only in disposable test environments</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci verify-interpreter \
+  --project . \
+  --original-python .venv-bad/bin/python \
+  --candidate-python .venv-good/bin/python \
+  --allow-local-execution \
+  --timeout 60 --out repair-proof.json \
+  -- -m app</code></pre></div>
+<div class="note warning"><p><strong>Limitation.</strong> The two environments can differ in installed packages as well as interpreter path. The experiment verifies that the candidate invocation succeeds, not that the choice of executable was isolated as the sole cause. EnvGuard does not edit dependencies or application code.</p></div>
+</section>
+
+<section id="tutorial-reading">
+<h2>7. Interpreting the evidence dossier</h2>
+<p><span class="small-label">Objective.</span> Distinguish a classified error from a supported root-cause claim, and distinguish a successful test from production readiness.</p>
+<h3>Render an incident as Markdown</h3>
+<div class="code-example"><div class="code-caption"><span>Existing diagnostic JSON</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci triage --report incident.json \
+  --format markdown --out dossier.md</code></pre></div>
+<p>Look for the observed failure, root-cause hypothesis, confidence, evidence ledger and limitations. The evidence ledger points back to fields in the report JSON. If the report says <code>unresolved</code>, do not present a speculative patch as verified.</p>
+<h3>Distinguish the possible outcomes</h3>
+<table><thead><tr><th>Finding</th><th>What you can claim</th></tr></thead><tbody>
+<tr><td><code>module_missing</code></td><td>A Python module import failed. Cause may still be unknown.</td></tr>
+<tr><td><code>WRONG_PYTHON_INTERPRETER</code></td><td>Expected and directly executed Python differ, supported by runtime/package evidence.</td></tr>
+<tr><td><code>drift_detected</code></td><td>Observed metadata differs from the baseline; causal relevance remains to be established.</td></tr>
+<tr><td><code>observed_candidate_succeeds</code></td><td>The particular tested candidate invocation succeeded after the original failed.</td></tr>
+</tbody></table>
+<h3>Report the result responsibly</h3>
+<p>A good engineering incident summary should state which command failed, which environment was inspected, which baseline was used, which observed facts support the hypothesis, what experiment was run and what remains uncertain.</p>
+<div class="note"><p><strong>Next step.</strong> Want to contribute a new failure class? Create a minimal, synthetic regression fixture and a clearly documented expected diagnosis. See the <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/CONTRIBUTING.md">contributor guide</a>.</p></div>
+</section>
+<div class="ref-footer"><p><strong>End of laboratory notebook.</strong> Tutorials demonstrate selected v1.0.0rc2 behaviors and intended integration patterns; they are not evidence of general accuracy on unrelated enterprise incidents. Always adapt commands to your own repository structure, shell, runner and security policy.</p><p><a href="../docs/">Reference manual →</a> · <a href="../">Home →</a> · <a href="https://github.com/zgcharaf/ENV-Guard/issues">Report an issue ↗</a></p></div>
+</article></div>
+<footer class="site-footer"><span>EnvGuard CI · Worked tutorials · v1.0.0rc2</span><span><a href="../">Home</a> · <a href="../docs/">Documentation</a> · <a href="https://github.com/zgcharaf/ENV-Guard">GitHub</a></span></footer>
+</body></html>

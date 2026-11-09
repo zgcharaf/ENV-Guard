@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://zgcharaf.github.io/ENV-Guard/sitemap.xml

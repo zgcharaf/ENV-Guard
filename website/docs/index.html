@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#faf9f6">
+<meta name="description" content="EnvGuard CI technical reference: installation, architecture, CLI commands, baseline retrieval, evidence reports, integrity, CI and security.">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../styles.css"><script src="../app.js" defer></script>
+<title>Documentation — EnvGuard CI</title></head>
+<body><a class="skip-link" href="#main">Skip to documentation</a>
+<header class="masthead"><div class="masthead-inner">
+<a class="wordmark" href="../"><span class="symbol">E<span class="symbol-dot">·</span>G</span><span class="wordmark-name">EnvGuard <span>CI</span></span></a>
+<nav aria-label="Main navigation"><a href="../">Home</a><a href="./" aria-current="page">Documentation</a><a href="../tutorials/">Tutorials</a><a href="https://github.com/zgcharaf/ENV-Guard" rel="noopener noreferrer">GitHub ↗</a></nav>
+</div></header>
+<div class="doc-frame" id="main">
+<aside class="toc" aria-label="Documentation contents">
+<h2>Reference manual</h2>
+<a href="#introduction"><span class="toc-number">1.</span> Introduction</a>
+<a href="#installation"><span class="toc-number">2.</span> Installation</a>
+<a href="#concepts"><span class="toc-number">3.</span> Concepts</a>
+<a href="#architecture"><span class="toc-number">4.</span> Architecture</a>
+<a href="#first-diagnosis"><span class="toc-number">5.</span> First diagnosis</a>
+<div class="toc-group">Command reference</div>
+<a href="#commands"><span class="toc-number">6.</span> CLI overview</a>
+<a href="#collect"><span class="toc-number">7.</span> Inspect &amp; compare</a>
+<a href="#investigate"><span class="toc-number">8.</span> CI investigation</a>
+<a href="#reports"><span class="toc-number">9.</span> Reports &amp; formats</a>
+<a href="#baselines"><span class="toc-number">10.</span> CI baselines</a>
+<a href="#wheels"><span class="toc-number">11.</span> Wheel verification</a>
+<a href="#repair"><span class="toc-number">12.</span> Repair experiments</a>
+<div class="toc-group">Operations</div>
+<a href="#artifacts"><span class="toc-number">13.</span> Data &amp; schemas</a>
+<a href="#security"><span class="toc-number">14.</span> Security model</a>
+<a href="#troubleshooting"><span class="toc-number">15.</span> Troubleshooting</a>
+<a href="#development"><span class="toc-number">16.</span> Contributing</a>
+<a href="#references"><span class="toc-number">17.</span> References</a>
+</aside>
+<article class="doc-article">
+<div class="doc-meta">Technical reference · v1.0.0rc2 · November 2026</div>
+<h1>Reference manual</h1>
+<p class="doc-lead">An evidence-led guide to diagnosing Python environment failures without conflating observation, correlation, and verified correction.</p>
+<div class="abstract"><span class="abstract-title">Scope</span><p>This manual documents the commands present in EnvGuard CI v1.0.0rc2. The software is an experimental release candidate for Python 3.11+. It operates locally by default; optional GitLab and GitHub baseline retrieval use their respective APIs. It is neither a package manager nor an autonomous repair system.</p></div>
+
+<section id="introduction">
+<h2>1. Introduction</h2>
+<p>EnvGuard CI is a command-line diagnostic tool for Python environments. It combines selected interpreter identity, installed-distribution metadata, project configuration and error signatures into reproducible JSON observations. It can compare a failing run with a supplied or fetched known-good snapshot and render an evidence-linked incident dossier.</p>
+<p>The central distinction is between <em>what happened</em> (for example, Python could not import a module) and <em>what caused it</em> (for example, an unintended interpreter was invoked). EnvGuard assigns a specific cause only when supporting evidence is present. Otherwise the incident remains unresolved.</p>
+<div class="note"><p><strong>Compatibility.</strong> Uses existing pip, uv, Poetry and virtual environments. It does not resolve or install application dependencies unless you explicitly wrap an installation command.</p></div>
+</section>
+
+<section id="installation">
+<h2>2. Installation</h2>
+<h3>Requirements</h3>
+<ul><li>CPython or another compatible Python runtime at version 3.11 or newer.</li><li>Git and a working Python installer (<code>python -m pip</code>) to install from source.</li><li>Internet access to clone or obtain the repository and install its <code>packaging</code> dependency, unless these are available offline.</li><li>Docker only for <code>certify-wheel</code> and optional Linux-container experiments.</li></ul>
+<h3>Linux, macOS, WSL2</h3>
+<div class="code-example"><div class="code-caption"><span>Shell</span><button class="copy" type="button">Copy</button></div><pre><code>git clone https://github.com/zgcharaf/ENV-Guard.git
+cd ENV-Guard
+python -m pip install -e .
+envguard-ci --version</code></pre></div>
+<h3>Windows PowerShell</h3>
+<div class="code-example"><div class="code-caption"><span>PowerShell</span><button class="copy" type="button">Copy</button></div><pre><code>git clone https://github.com/zgcharaf/ENV-Guard.git
+cd ENV-Guard
+py -m pip install -e .
+envguard-ci --version</code></pre></div>
+<p>For CI or repeatable installation, use a vetted wheel built from a reviewed commit instead of an editable checkout. The <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/docs/release.md">release checklist</a> covers wheel and source-distribution validation.</p>
+<div class="note warning"><p><strong>Package naming.</strong> The distribution, executable and import name are <code>envguard-ci</code>, <code>envguard-ci</code> and <code>envguard_ci</code>, respectively. Do not substitute the unrelated <code>envguard</code> package. Public PyPI availability is not asserted here.</p></div>
+</section>
+
+<section id="concepts">
+<h2>3. Core concepts</h2>
+<h3>Snapshot</h3>
+<p>A snapshot is a normalized, versioned JSON document recording a target interpreter, installed distributions, project metadata, platform identifiers and optional native-library inspection results. It does not record all filesystem contents or prove that the application can execute.</p>
+<h3>Fingerprints</h3>
+<p>The <code>spec</code> fingerprint summarizes selected declarative inputs and the <code>runtime</code> fingerprint summarizes observed runtime metadata. An artifact fingerprint may be unavailable; do not treat a metadata fingerprint as a cryptographic attestation of installed binary bytes.</p>
+<h3>Baseline</h3>
+<p>A baseline is an explicitly supplied snapshot or a successful-run artifact fetched from GitLab/GitHub. Before comparing, check OS, architecture, interpreter implementation, Python minor version and ABI. A successful workflow is <em>not necessarily</em> the preceding commit or a causal control.</p>
+<h3>Finding, hypothesis and proof</h3>
+<table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Observation</td><td>Directly captured outcome, error signature, interpreter identity or metadata.</td></tr>
+<tr><td>Finding</td><td>An inconsistency or difference supported by checks; not necessarily the failure cause.</td></tr>
+<tr><td>Hypothesis</td><td>An explanation supported to some degree by the available evidence.</td></tr>
+<tr><td>Experiment</td><td>Rerun the same command with an explicitly changed condition; record both outcomes.</td></tr>
+<tr><td>Bounded verification</td><td>A particular command passed in a particular candidate environment, not universal compatibility.</td></tr>
+</tbody></table>
+</section>
+
+<section id="architecture">
+<h2>4. Architecture</h2>
+<p>The implementation is a local Python package. Its major subsystems are: <code>collection</code> (runtime observation), <code>graph</code> and <code>requirements</code> (installed metadata and markers), <code>comparability</code> and <code>diagnostics</code> (snapshot differences), <code>failure</code> and <code>incident</code> (evidence-led analysis), <code>gitlab</code> and <code>github</code> (read-only CI artifact retrieval), and <code>artifacts</code>, <code>verification</code>, <code>certify</code> (specific integrity and execution tests).</p>
+<div class="definition"><span class="definition-label">Processing sequence</span><p>Run command → collect or inspect evidence → compare compatible snapshots → classify observed failure → render the evidence ledger → optionally execute a separately authorized experiment.</p></div>
+<p>No central database or EnvGuard telemetry endpoint is required. The wrapped application command still executes with the runner's privileges, and CI reports remain subject to the hosting platform's access controls.</p>
+<p>Further implementation details: <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/docs/v1-architecture.md">architecture and trust boundaries</a>.</p>
+</section>
+
+<section id="first-diagnosis">
+<h2>5. Your first diagnosis</h2>
+<div class="code-example"><div class="code-caption"><span>Capture, check, run</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci snapshot --project . --out local.json
+envguard-ci doctor --snapshot local.json
+envguard-ci investigate --project . \
+  --snapshot-out current.json --report-out incident.json \
+  -- python -m unittest discover -s tests</code></pre></div>
+<p>EnvGuard saves the JSON report and, when possible, an adjacent Markdown dossier (for example, <code>incident.md</code>). The underlying command's original failure exit status is preserved. For a Windows-specific walkthrough and a deliberately failing example, see <a href="../tutorials/#tutorial-local">Tutorial 1</a>.</p>
+</section>
+
+<section id="commands">
+<h2>6. CLI overview</h2>
+<p>Run <code>envguard-ci COMMAND --help</code> for the authoritative argument list in your installed version.</p>
+<table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>snapshot</code></td><td>Capture a target environment.</td></tr>
+<tr><td><code>doctor</code></td><td>Check one snapshot for supported inconsistencies.</td></tr>
+<tr><td><code>graph</code></td><td>Evaluate installed distribution requirements, markers and extras.</td></tr>
+<tr><td><code>diff</code></td><td>Compare baseline and current snapshots.</td></tr>
+<tr><td><code>ci-run</code></td><td>Wrap a command; preserve output status and diagnostic artifacts.</td></tr>
+<tr><td><code>investigate</code></td><td>Wrap command with optional GitLab/GitHub last-green retrieval.</td></tr>
+<tr><td><code>triage</code></td><td>Generate an evidence-linked incident dossier.</td></tr>
+<tr><td><code>render-report</code></td><td>Output Markdown, GitHub annotations or GitLab Code Quality JSON.</td></tr>
+<tr><td><code>diagnose-failure</code></td><td>Analyze a supplied log and snapshots.</td></tr>
+<tr><td><code>github-baseline</code></td><td>Read a GitHub Actions snapshot artifact.</td></tr>
+<tr><td><code>gitlab-baseline</code></td><td>Read a GitLab job snapshot artifact.</td></tr>
+<tr><td><code>inspect-wheel</code></td><td>Verify wheel byte identity and RECORD integrity.</td></tr>
+<tr><td><code>verify-interpreter</code></td><td>Execute a controlled two-interpreter experiment.</td></tr>
+<tr><td><code>certify-wheel</code></td><td>Run an offline wheel-install/import smoke test in Docker.</td></tr>
+</tbody></table>
+</section>
+
+<section id="collect">
+<h2>7. Inspecting and comparing environments</h2>
+<h3><code>snapshot</code></h3>
+<div class="code-example"><div class="code-caption"><span>Capture target interpreter</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci snapshot --project . --python .venv/bin/python \
+  --out baseline.json</code></pre></div>
+<p><code>--python</code> selects which interpreter to inspect; without it, EnvGuard inspects the interpreter running the tool. Linux <code>--native</code> enables selected ELF and shared-library checks; without it, native evidence is not gathered.</p>
+<h3><code>doctor</code></h3>
+<div class="code-example"><div class="code-caption"><span>Check declared/observed requirements</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci doctor --snapshot baseline.json --format text
+envguard-ci doctor --snapshot baseline.json --extra dashboard</code></pre></div>
+<p>The <code>--extra</code> flag activates named project extras; unselected extras should not be counted as missing required dependencies.</p>
+<h3><code>graph</code></h3>
+<div class="code-example"><div class="code-caption"><span>Focused dependency reasoning</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci graph --snapshot baseline.json --focus pandas
+envguard-ci graph --snapshot baseline.json --scope environment
+envguard-ci graph --snapshot baseline.json --show-inactive</code></pre></div>
+<p>By default the graph focuses on project-reachable dependencies. Environment scope includes the installed environment; <code>--show-inactive</code> displays conditional and unselected references for explanation.</p>
+<h3><code>diff</code></h3>
+<div class="code-example"><div class="code-caption"><span>Known-good vs current</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci diff --baseline baseline.json --current current.json \
+  --format json --out difference.json</code></pre></div>
+<p>A change in runtime fingerprint is evidence of drift, not a causal diagnosis. The <code>--fail-on</code> threshold can make findings affect the command exit code; absent that threshold, run outcomes and diagnostic severity are separate.</p>
+</section>
+
+<section id="investigate">
+<h2>8. Investigating CI commands</h2>
+<h3><code>ci-run</code> — explicit baseline</h3>
+<div class="code-example"><div class="code-caption"><span>Run tests through the intended interpreter</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci ci-run --project . --python .venv/bin/python \
+  --baseline baseline.json \
+  --snapshot-out incident/current.json \
+  --report-out incident/report.json \
+  -- .venv/bin/python -m pytest -q</code></pre></div>
+<p>The argument after <code>--</code> is the command to execute, not a shell command line. Use a direct Python invocation where possible: arbitrary shell wrappers, subprocesses, <code>uv run</code> and <code>poetry run</code> are not traced to the eventual Python child.</p>
+<h3><code>investigate</code> — optional fetched baseline</h3>
+<div class="code-example"><div class="code-caption"><span>GitLab example</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci investigate --project . --python .venv/bin/python \
+  --last-green gitlab --baseline-ref "$CI_DEFAULT_BRANCH" \
+  --baseline-job 'envguard-ci:tests' \
+  --baseline-artifact envguard-ci.json \
+  --snapshot-out incident/current.json \
+  --report-out incident/report.json \
+  -- .venv/bin/python -m pytest -q</code></pre></div>
+<p>If the requested baseline cannot be fetched, EnvGuard can continue with an explicitly incomplete comparison. Use <code>--require-baseline</code> to refuse the wrapped execution when the baseline is unavailable. <code>--fail-on</code> changes the diagnostic threshold policy; do not conflate diagnostic severity with the wrapped command's return code.</p>
+<h3><code>diagnose-failure</code> — existing logs</h3>
+<div class="code-example"><div class="code-caption"><span>Historical failure review</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci diagnose-failure --baseline baseline.json \
+  --current current.json --log failure.log \
+  --exit-code 1 --format json --out diagnosis.json</code></pre></div>
+<p>Logs are treated as untrusted observations. A matching error string alone is not proof of a root cause. Avoid exporting raw logs containing secrets.</p>
+</section>
+
+<section id="reports">
+<h2>9. Incident dossiers and reporting formats</h2>
+<p>A normal instrumented run emits a snapshot, a diagnostic JSON report, and an adjacent Markdown incident dossier. The JSON provides the supporting evidence references used by the Markdown report.</p>
+<table><thead><tr><th>Output</th><th>Typical contents</th></tr></thead><tbody>
+<tr><td><code>current.json</code></td><td>Python version, interpreter identity, project metadata, installed distribution inventory and fingerprints.</td></tr>
+<tr><td><code>report.json</code></td><td>CI execution result, compatible-baseline status, findings, observed failure and root-cause hypothesis, if supported.</td></tr>
+<tr><td><code>report.md</code></td><td>Human-readable evidence ledger, confidence, limitations and safe next checks.</td></tr>
+</tbody></table>
+<div class="code-example"><div class="code-caption"><span>Render an existing report</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci triage --report report.json \
+  --format markdown --out dossier.md
+envguard-ci render-report --input report.json \
+  --format github-annotations
+envguard-ci render-report --input report.json \
+  --format gitlab-codequality --out codequality.json</code></pre></div>
+<div class="note warning"><p><strong>Code Quality anchoring.</strong> Environment-wide findings may use a synthetic repository-relative anchor such as <code>pyproject.toml:1</code>. This does not mean that line contains the defect.</p></div>
+<h3 id="interpretation">Interpreting diagnostic language</h3>
+<table><thead><tr><th>Report term</th><th>Correct reading</th></tr></thead><tbody>
+<tr><td><code>no_local_findings</code></td><td>No inconsistency found by implemented checks, not proof the command succeeded or the environment is sound.</td></tr>
+<tr><td><code>drift_detected</code></td><td>Comparative differences found; they might be unrelated to the failure.</td></tr>
+<tr><td><code>supported_hypothesis</code></td><td>Observations support one explanation; not independently verified causation.</td></tr>
+<tr><td><code>unresolved</code></td><td>Insufficient evidence to assign a specific underlying cause.</td></tr>
+<tr><td><code>observed_candidate_succeeds</code></td><td>One alternate interpreter invocation succeeded after the original failed; scope is limited to those runs.</td></tr>
+</tbody></table>
+</section>
+
+<section id="baselines">
+<h2>10. GitLab and GitHub baselines</h2>
+<p>EnvGuard may retrieve the latest successful run's snapshot from a named GitLab job or GitHub Actions artifact. The baseline is a historical reference, not necessarily the immediate predecessor of the failing commit.</p>
+<h3>GitLab</h3>
+<div class="code-example"><div class="code-caption"><span>Explicit read-only baseline retrieval</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci gitlab-baseline \
+  --job 'envguard-ci:tests' \
+  --artifact envguard-ci.json \
+  --out good.json</code></pre></div>
+<p>Inside a runner, GitLab usually supplies <code>CI_API_V4_URL</code>, <code>CI_PROJECT_ID</code>, and <code>CI_DEFAULT_BRANCH</code>. Authentication may use <code>CI_JOB_TOKEN</code> if permitted, or a narrowly scoped <code>ENVGUARD_GITLAB_READ_TOKEN</code> passed through protected variables. Use <code>artifacts: when: always</code> for failure reports and a separately retained green snapshot.</p>
+<h3>GitHub Actions</h3>
+<div class="code-example"><div class="code-caption"><span>Explicit GitHub baseline retrieval</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci github-baseline --repo OWNER/REPO \
+  --ref main --workflow ci.yml \
+  --artifact-name envguard-baseline \
+  --snapshot-name envguard-ci.json --out good.json</code></pre></div>
+<p>Provide a read-authorized <code>GITHUB_TOKEN</code> or <code>ENVGUARD_GITHUB_READ_TOKEN</code>, and grant <code>actions: read</code> in the workflow. The baseline-producing job must upload a snapshot file within an artifact named <code>envguard-baseline</code>. Do not expose privileged tokens to untrusted fork pull requests.</p>
+<div class="note"><p><strong>Comparability warning.</strong> OS, architecture, Python version/implementation and ABI should be comparable; otherwise a dependency difference may simply reflect platform-specific resolution. A baseline from an unrelated runner is not a scientific control.</p></div>
+<p>Complete end-to-end setup: <a href="../tutorials/#tutorial-gitlab">GitLab tutorial</a> and <a href="../tutorials/#tutorial-github">GitHub Actions tutorial</a>.</p>
+</section>
+
+<section id="wheels">
+<h2>11. Wheel identity and target compatibility</h2>
+<h3><code>inspect-wheel</code></h3>
+<div class="code-example"><div class="code-caption"><span>Offline byte and RECORD verification</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci inspect-wheel \
+  --wheel dist/example-1.0.0-py3-none-any.whl \
+  --out integrity.json</code></pre></div>
+<p>To compare against a trusted known SHA-256, add <code>--approved-sha256</code> followed by the expected 64-hex-character digest. This checks archive identity and internal RECORD hashes. It does <strong>not</strong> establish publisher trust, system-library compatibility, or runtime behavior.</p>
+<h3><code>certify-wheel</code></h3>
+<div class="code-example"><div class="code-caption"><span>Offline target-container import smoke</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci certify-wheel \
+  --wheel dist/example-1.0.0-py3-none-any.whl \
+  --image 'registry.example/runtime@sha256:REPLACE_WITH_REAL_64_HEX_DIGEST' \
+  --module example --wheelhouse ./approved-wheels \
+  --out deployment-proof.json</code></pre></div>
+<p>The example image digest is a placeholder. Use a real pre-pulled, trusted image pinned by immutable digest. EnvGuard attempts installation using local artifacts and runs a Python import test with Docker networking disabled. Other dependencies must already be available in the approved wheelhouse or target image. Mutable tags require explicit <code>--allow-mutable-image</code>.</p>
+<div class="note warning"><p><strong>Execution risk.</strong> Wheel installation and imports execute package code. Docker's isolation is limited; use approved images and trusted artifacts on disposable hosts. A passing import smoke test does not certify production behavior or security.</p></div>
+</section>
+
+<section id="repair">
+<h2>12. Constrained correction experiments</h2>
+<p>The <code>verify-interpreter</code> command compares the same module invocation under two explicitly named Python environments. It requires an opt-in flag and does not patch source files, change installed dependencies or run inside a security sandbox.</p>
+<div class="code-example"><div class="code-caption"><span>Only in a trusted/disposable environment</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci verify-interpreter --project . \
+  --original-python .venv-bad/bin/python \
+  --candidate-python .venv-good/bin/python \
+  --allow-local-execution \
+  --out experiment.json -- -m app</code></pre></div>
+<p>The command requires a directly specified Python <code>-m</code> or <code>-c</code> invocation, distinct observable environments and a bounded timeout (default 60 seconds). The candidate is not run if the original command unexpectedly succeeds or fails to launch.</p>
+<div class="note warning"><p><strong>Critical limitation.</strong> Changing the interpreter often changes the installed packages too. A successful candidate run is evidence that the selected candidate environment executes the command; it does not isolate interpreter identity as the sole causal factor.</p></div>
+</section>
+
+<section id="artifacts">
+<h2>13. JSON data, fingerprints and schemas</h2>
+<p>Runtime observations and reports are versioned JSON documents intended for machine analysis. The repository contains <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/schemas/environment-snapshot.v1.schema.json">environment snapshot schema v1</a> and <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/schemas/dependency-graph.v2.schema.json">dependency graph schema v2</a>.</p>
+<p>Fields commonly encountered in a snapshot include <code>schema_version</code>, <code>platform</code>, <code>runtime</code>, <code>packages</code>, <code>project</code>, <code>native</code> and <code>fingerprints</code>. Reports include <code>ci</code>, <code>counts</code>, <code>findings</code>, <code>failure_analysis</code>, and sometimes <code>execution_provenance</code>.</p>
+<div class="code-example"><div class="code-caption"><span>Inspect key report fields</span><button class="copy" type="button">Copy</button></div><pre><code>python -c "import json; d=json.load(open('report.json')); print(d.get('status')); print(d.get('failure_analysis', {}).get('root_cause_hypothesis'))"</code></pre></div>
+<p>Do not treat hashed or redacted paths as reconstructible full filesystem identities. Tokens and full raw logs are deliberately not included in regular diagnostic JSON, but private package names, version information and project identifiers can remain sensitive.</p>
+</section>
+
+<section id="security">
+<h2>14. Security and privacy model</h2>
+<h3>What is local</h3>
+<p>Snapshot generation, graph inspection, comparisons, offline wheel inspection and dossier rendering do not require an EnvGuard cloud service. CI baseline retrieval uses GitLab/GitHub APIs when explicitly requested. Diagnostic tools do not guarantee that application code or import hooks cannot run during interpreter probing or wrapped execution.</p>
+<h3>Protected inputs and outputs</h3>
+<ul><li>Use private repositories, scoped artifact permissions and short report retention for proprietary software.</li><li>Never embed PATs, registry passwords or customer data in commands or tracked files.</li><li>Protect source, test and CI artifacts from unauthorized readers: metadata itself may be confidential.</li><li>Do not run arbitrary pull-request code in a privileged repair environment with secrets or write tokens.</li><li>Treat all fetched JSON, package metadata, log text and wheel contents as untrusted inputs.</li><li>Pin container images by digest; avoid handing the Docker socket to untrusted code.</li></ul>
+<p>Review <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/SECURITY.md">SECURITY.md</a> for disclosure guidance. A local-first architecture does not by itself imply compliance with banking security requirements.</p>
+</section>
+
+<section id="troubleshooting">
+<h2>15. Troubleshooting</h2>
+<details open><summary><code>envguard-ci</code> is not recognized.</summary><p>Use <code>python -m envguard_ci --version</code> from the installed interpreter, or confirm the environment's Scripts/bin directory is on your PATH. Install from the source checkout with <code>python -m pip install -e .</code>. Remove stale <code>PYTHONPATH</code> overrides.</p></details>
+<details><summary>It reports <code>no_local_findings</code> although tests failed.</summary><p>The tool may have observed the failed command but found no supported environment inconsistency. Inspect <code>failure_analysis</code> and the Markdown dossier. A failed command and a clean local doctor are not contradictory.</p></details>
+<details><summary>Baseline fetch says unavailable.</summary><p>Verify branch, exact CI job/workflow and artifact names, permission scopes, artifact expiration and success status. On a first run there may be no successful baseline. Use <code>--require-baseline</code> only if a missing baseline should block execution.</p></details>
+<details><summary>Why is wrong interpreter diagnosis missing?</summary><p>Set <code>--python</code> to an explicitly intended executable and invoke Python directly after <code>--</code>. EnvGuard does not trace arbitrary shell wrappers or spawned child Python processes.</p></details>
+<details><summary>Hundreds of “optional” package references appear.</summary><p>Package metadata can list unselected extras and marker-excluded requirements. Use a project-focused graph and avoid treating raw references to uninstalled packages as missing required dependencies. Compare with <code>python -m pip check</code> on the same interpreter.</p></details>
+<details><summary>The Docker certification command fails.</summary><p>Check that Docker Engine is running, the target digest exists locally, the container can run Python and venv, and all required wheels are available without network access. The default offline image requirement is deliberate.</p></details>
+<details><summary>What does an exit code tell me?</summary><p><code>ci-run</code> and <code>investigate</code> preserve the wrapped command's failure exit status in normal operation. Nonzero may also occur because of CLI usage, inaccessible resources or a configured diagnostic <code>--fail-on</code> policy. Always inspect the report and command log; do not infer one universal exit-code mapping.</p></details>
+</section>
+
+<section id="development">
+<h2>16. Development and contribution</h2>
+<div class="code-example"><div class="code-caption"><span>From the project root</span><button class="copy" type="button">Copy</button></div><pre><code>python -m pip install -e .
+python -m unittest discover -s tests -v
+python lab/run_lab.py
+python examples/run_v1_repair_demo.py</code></pre></div>
+<p>The optional Linux C++ lab can be executed with Docker by building <code>lab/Dockerfile</code>. The lab intentionally injects failures and is not a blind industry benchmark. For contribution standards see <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>; for known changes see the <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/CHANGELOG.md">changelog</a>.</p>
+<p>A useful external contribution is a minimal, anonymized reproduction of a CI environment failure, with a compatible working run, a failing run, and a clear independent root-cause label. Do not submit confidential bank logs or credentials.</p>
+</section>
+
+<section id="references">
+<h2>17. Standards and references</h2>
+<ol>
+<li><a href="https://packaging.python.org/en/latest/specifications/">Python Packaging User Guide</a> — distribution and metadata specifications.</li>
+<li><a href="https://peps.python.org/pep-0508/">PEP 508</a> — dependency specifiers and environment markers.</li>
+<li><a href="https://peps.python.org/pep-0440/">PEP 440</a> — version identifiers and constraints.</li>
+<li><a href="https://docs.gitlab.com/ci/jobs/job_artifacts/">GitLab job artifacts documentation</a> — retaining diagnostic evidence.</li>
+<li><a href="https://docs.github.com/en/actions">GitHub Actions documentation</a> — artifact workflows and permissions.</li>
+<li><a href="https://github.com/zgcharaf/ENV-Guard/blob/main/docs/v1-validation.md">EnvGuard validation record</a> — tested versus untested functionality.</li>
+</ol>
+<div class="ref-footer"><p><strong>Manual status.</strong> This is a documentation snapshot for v1.0.0rc2. The installed program's <code>--help</code> output and repository source remain the definitive description of exact behavior. The site has no telemetry or server-side components.</p>
+<p><a href="../tutorials/">Next: worked tutorials →</a> · <a href="../">Return to the homepage</a></p></div>
+</section>
+</article></div>
+<footer class="site-footer"><span>EnvGuard CI · Reference manual · v1.0.0rc2</span><span><a href="../">Home</a> · <a href="../tutorials/">Tutorials</a> · <a href="https://github.com/zgcharaf/ENV-Guard">GitHub</a></span></footer>
+</body></html>

@@ -1,4 +1,10 @@
-# EnvGuard CI v1.0.0rc1 — evidence-led release candidate
+# EnvGuard CI — Python CI diagnostics
+
+**Documentation:** [Academic website](https://zgcharaf.github.io/ENV-Guard/) · [Complete reference manual](https://zgcharaf.github.io/ENV-Guard/docs/) · [Seven tutorials](https://zgcharaf.github.io/ENV-Guard/tutorials/)
+
+**Current source release:** `1.0.0rc2` (experimental; no production guarantees). The historical sections below document older releases and should be interpreted accordingly.
+
+---
 
 **Diagnose Python CI environment drift, verify wheel bytes, and run constrained recovery experiments.**
 
