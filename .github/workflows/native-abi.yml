@@ -1,0 +1,49 @@
+name: Reproduce external ARM64 native ABI mismatch
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "research/replay_native_abi.py"
+      - "research/validate_native_abi.py"
+      - "tests/test_native_abi_replay.py"
+      - ".github/workflows/native-abi.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    name: Static CasADi ARM64 wheel ABI audit (no wheel execution)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Check external ELF inspection tool
+        run: |
+          command -v readelf
+          readelf --version | head -n 1
+      - name: Verify preregistered test and symbol parser
+        run: python -m unittest discover -s tests -p "test_native_abi_replay.py" -v
+      - name: Download and statically inspect pinned PyPI ARM64 wheels
+        run: >-
+          python research/replay_native_abi.py
+          --out research-results/native-abi.json
+      - name: Validate signed-off experimental claim scope
+        run: >-
+          python research/validate_native_abi.py
+          --input research-results/native-abi.json
+      - name: Retain machine-readable static evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: external-native-abi-static-evidence
+          path: research-results/native-abi.json
+          if-no-files-found: warn
+          retention-days: 30
