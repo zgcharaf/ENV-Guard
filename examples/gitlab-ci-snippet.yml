@@ -1,0 +1,20 @@
+# For another project, check out the v0.x repository under tools/envguard-ci.
+stages: [test]
+envguard-ci:diagnose:
+  stage: test
+  image: python:3.12-slim
+  script:
+    - python -m pip install -e tools/envguard-ci
+    - python -m venv .venv
+    - envguard-ci ci-run --project . --python .venv/bin/python --snapshot-out install-ci.json --report-out install-report.json -- .venv/bin/python -m pip install -r requirements.txt
+    - envguard-ci ci-run --project . --python .venv/bin/python --snapshot-out tests-ci.json --report-out tests-report.json -- .venv/bin/python -m pytest -q
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - install-ci.json
+      - install-report.json
+      - install-report.md
+      - tests-ci.json
+      - tests-report.json
+      - tests-report.md

@@ -1,0 +1,79 @@
+{
+  "captured_at": "2026-10-21T00:00:00+00:00",
+  "fingerprints": {
+    "artifact": null,
+    "runtime": "sha256:a30434b77e6a54f24ed9511344b0207d2e5f2d7a19706d17febc73d7b361690f",
+    "spec": "sha256:569034986c9f4dcf8720560af6945880c29137fcf0c347c9b0cc41b1281df4b7"
+  },
+  "native": {
+    "libraries": [],
+    "notes": [],
+    "provided_symbols": {},
+    "requirements": [],
+    "scan_status": "disabled"
+  },
+  "packages": [
+    {
+      "name": "numpy",
+      "origin_hash": null,
+      "requires": [],
+      "version": "2.1.0",
+      "wheel_tags": [
+        "cp312-cp312-manylinux_2_17_x86_64"
+      ]
+    },
+    {
+      "name": "requests",
+      "origin_hash": null,
+      "requires": [
+        "urllib3>=1.21"
+      ],
+      "version": "2.32.3",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "name": "urllib3",
+      "origin_hash": null,
+      "requires": [],
+      "version": "2.2.2",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    }
+  ],
+  "platform": {
+    "arch": "aarch64",
+    "libc": "glibc-2.36",
+    "os": "linux"
+  },
+  "project": {
+    "dependencies": [
+      "requests>=2",
+      "numpy>=2"
+    ],
+    "detected_managers": [
+      "uv"
+    ],
+    "files": [
+      {
+        "name": "pyproject.toml",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "name": "uv.lock",
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "requires_python": ">=3.11"
+  },
+  "runtime": {
+    "environment_kind": "venv",
+    "executable_name": "python",
+    "implementation": "CPython",
+    "soabi": "cpython-312-x86_64-linux-gnu",
+    "version": "3.12.7"
+  },
+  "schema_version": "1.0"
+}

@@ -1,0 +1,16 @@
+include README.md LICENSE SECURITY.md CONTRIBUTING.md CHANGELOG.md
+include .gitlab-ci.yml .gitignore .dockerignore
+recursive-include .github *.yml
+recursive-include docs *.md
+recursive-include schemas *.json
+recursive-include examples *.py *.md *.sh *.ps1 *.yml *.mmd *.json
+recursive-include lab *.py *.md *.cpp *.toml Dockerfile
+recursive-include tests *.py *.json
+prune lab/.envguard-runs
+prune lab-results
+prune .envguard-runs
+prune build
+prune dist
+global-exclude __pycache__ *.py[cod] *.log
+
+recursive-include scripts *.py

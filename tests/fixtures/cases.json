@@ -1,0 +1,20 @@
+{
+  "abi": "ABI_MISMATCH",
+  "arch": "ARCH_MISMATCH",
+  "environment_kind": "ENVIRONMENT_KIND_DRIFT",
+  "libc": "LIBC_MISMATCH",
+  "lockfile_changed": "LOCKFILE_CHANGED",
+  "lockfile_missing": "LOCKFILE_MISSING",
+  "metadata_drift": "PACKAGE_METADATA_DRIFT",
+  "missing_native_lib": "NATIVE_LIBRARY_UNRESOLVED",
+  "multiple_lock_formats": "MULTIPLE_LOCK_FORMATS",
+  "operating_system": "OS_MISMATCH",
+  "package_missing": "PACKAGE_MISSING",
+  "project_python": "PROJECT_PYTHON_UNSUPPORTED",
+  "python_impl": "PYTHON_IMPLEMENTATION_MISMATCH",
+  "python_minor": "PYTHON_MINOR_MISMATCH",
+  "symbol_version": "SYMBOL_VERSION_UNAVAILABLE",
+  "unsatisfied_dependency": "UNSATISFIED_RUNTIME_DEPENDENCY",
+  "version_drift": "PACKAGE_VERSION_DRIFT",
+  "wheel_tag": "WHEEL_TAG_DIFFERENCE"
+}

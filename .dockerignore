@@ -1,0 +1,8 @@
+.git
+**/__pycache__
+**/*.pyc
+lab/.envguard-runs/
+lab-results/
+.envguard-runs/
+.venv/
+*.zip

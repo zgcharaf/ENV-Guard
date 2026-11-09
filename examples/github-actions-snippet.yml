@@ -1,0 +1,41 @@
+# Adapt this to an existing project with its own tests and dependency manager.
+# For v0.x testing, vendor/checkout envguard-ci under tools/envguard-ci/.
+name: Python environment diagnostics
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e tools/envguard-ci
+      - run: python -m venv .venv
+      - name: Install project dependencies and capture installer errors
+        run: |
+          envguard-ci ci-run --project . --python .venv/bin/python \
+            --snapshot-out install-ci.json --report-out install-report.json \
+            -- .venv/bin/python -m pip install -r requirements.txt
+      - name: Run tests and collect environment evidence
+        run: |
+          envguard-ci ci-run --project . --python .venv/bin/python \
+            --snapshot-out tests-ci.json --report-out tests-report.json \
+            -- .venv/bin/python -m pytest -q
+      - name: Preserve diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: envguard-ci-reports
+          path: |
+            install-ci.json
+            install-report.json
+            install-report.md
+            tests-ci.json
+            tests-report.json
+            tests-report.md
+          if-no-files-found: warn

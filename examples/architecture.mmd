@@ -1,0 +1,12 @@
+flowchart TD
+  Good[Successful CI snapshot] --> Compare[Environment diff]
+  Fail[Failing command] --> Log[Bounded log signature]
+  Fail --> Provenance[Direct interpreter provenance]
+  Fail --> Snapshot[Failing environment snapshot]
+  Snapshot --> Compare
+  Compare --> Diagnose[Evidence-gated diagnosis]
+  Log --> Diagnose
+  Provenance --> Diagnose
+  Diagnose --> JSON[Diagnostic JSON]
+  JSON --> Dossier[Auditable incident Markdown]
+  JSON --> Reports[CI annotations and code-quality report]

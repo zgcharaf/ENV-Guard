@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:envguard:dependency-graph:v2",
+  "title": "EnvGuard dependency graph v2",
+  "type": "object",
+  "required": ["schema_version", "scope", "nodes", "edges", "stats", "disclaimer"],
+  "properties": {
+    "schema_version": {"const": "2.0"},
+    "scope": {"enum": ["project", "environment", "focus"]},
+    "focus": {"type": ["string", "null"]},
+    "selected_extras": {"type": "array", "items": {"type": "string"}},
+    "marker_environment_coverage": {"type": "array", "items": {"type": "string"}},
+    "nodes": {"type": "array", "items": {"type": "object", "required": ["name", "installed"], "properties": {"name": {"type": "string"}, "version": {"type": ["string", "null"]}, "installed": {"type": "boolean"}}}},
+    "edges": {"type": "array", "items": {"type": "object", "required": ["from", "to", "requirement", "status", "installed"], "properties": {"from": {"type": "string"}, "to": {"type": "string"}, "requirement": {"type": "string"}, "status": {"enum": ["required_satisfied", "required_missing", "required_incompatible", "required_unverifiable", "optional_unselected", "marker_excluded", "unknown"]}, "installed": {"type": "boolean"}}}},
+    "stats": {"type": "object"},
+    "disclaimer": {"type": "string"}
+  }
+}

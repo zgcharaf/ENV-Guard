@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "envguard-ci"
+version = "1.0.0rc2"
+description = "Evidence-led Python CI failure analysis, wheel integrity, and constrained repair verification"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "EnvGuard CI contributors"}]
+keywords = ["python", "ci", "gitlab", "github-actions", "dependency-diagnostics", "virtualenv"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = ["packaging>=24.2,<27"]
+
+[project.scripts]
+envguard-ci = "envguard_ci.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

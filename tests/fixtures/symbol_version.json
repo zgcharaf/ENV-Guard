@@ -1,0 +1,97 @@
+{
+  "captured_at": "2026-10-21T00:00:00+00:00",
+  "fingerprints": {
+    "artifact": null,
+    "runtime": "sha256:f7b06083ddb978e9d0d8514370c541ebd1e7fdc8a456c082a4c90468a42c84fa",
+    "spec": "sha256:569034986c9f4dcf8720560af6945880c29137fcf0c347c9b0cc41b1281df4b7"
+  },
+  "native": {
+    "libraries": [
+      "libstdc++.so.6"
+    ],
+    "notes": [],
+    "provided_symbols": {
+      "libstdc++.so.6": [
+        "GLIBCXX_3.4.28",
+        "GLIBCXX_3.4.29"
+      ]
+    },
+    "requirements": [
+      {
+        "extension": "_fast.so",
+        "needed": [
+          "libstdc++.so.6"
+        ],
+        "package": "numpy",
+        "symbol_versions": [
+          "GLIBCXX_3.4.30"
+        ]
+      }
+    ],
+    "scan_status": "complete"
+  },
+  "packages": [
+    {
+      "name": "numpy",
+      "origin_hash": null,
+      "requires": [],
+      "version": "2.1.0",
+      "wheel_tags": [
+        "cp312-cp312-manylinux_2_17_x86_64"
+      ]
+    },
+    {
+      "name": "requests",
+      "origin_hash": null,
+      "requires": [
+        "urllib3>=1.21"
+      ],
+      "version": "2.32.3",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    },
+    {
+      "name": "urllib3",
+      "origin_hash": null,
+      "requires": [],
+      "version": "2.2.2",
+      "wheel_tags": [
+        "py3-none-any"
+      ]
+    }
+  ],
+  "platform": {
+    "arch": "x86_64",
+    "libc": "glibc-2.36",
+    "os": "linux"
+  },
+  "project": {
+    "dependencies": [
+      "requests>=2",
+      "numpy>=2"
+    ],
+    "detected_managers": [
+      "uv"
+    ],
+    "files": [
+      {
+        "name": "pyproject.toml",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      {
+        "name": "uv.lock",
+        "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      }
+    ],
+    "requires_python": ">=3.11"
+  },
+  "runtime": {
+    "environment_kind": "venv",
+    "executable_name": "python",
+    "implementation": "CPython",
+    "soabi": "cpython-312-x86_64-linux-gnu",
+    "version": "3.12.7"
+  },
+  "schema_version": "1.0"
+}

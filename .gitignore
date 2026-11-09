@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.venv/
+build/
+dist/
+.coverage
+*.log
+.DS_Store
+
+# Local CI analysis outputs can reveal package metadata.
+*ci-snapshot.json
+*ci-report.json
+*ci-report.md
+envguard-ci.json
+envguard-report.json
+envguard-report.md
+envguard-baseline.json
+lab/.envguard-runs/
+lab-results/
+.envguard-runs/

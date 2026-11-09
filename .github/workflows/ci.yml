@@ -1,0 +1,136 @@
+name: EnvGuard CI quality gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Tests / ${{ matrix.os }} / Python ${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.12', '3.13']
+        include:
+          - os: macos-latest
+            python: '3.12'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install local distribution
+        run: python -m pip install -e .
+      - name: Core, regression and security tests
+        run: python -m unittest discover -s tests -v
+
+  reproducible-lab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e .
+      - name: Wrong-interpreter reproduction
+        run: python examples/run_failure_demo.py
+      - name: Verify observed correction against synthetic wrong-interpreter failure
+        run: python examples/run_v1_repair_demo.py
+      - name: Complete controlled failure lab (including C++ shared libraries)
+        run: python lab/run_lab.py --out lab-results
+      - name: Retain only synthetic test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: controlled-failure-lab
+          path: |
+            lab-results/benchmark.json
+            lab/.envguard-runs/demo-ci-report.json
+            lab/.envguard-runs/demo-ci-report.md
+          if-no-files-found: warn
+          retention-days: 7
+
+
+  # Latest successful artifact baseline for subsequent investigations. Read-only
+  # API permission; artifacts contain package metadata and must stay private
+  # for proprietary applications. Fail open for the first successful run.
+  evidence-baseline:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -e .
+      - name: Investigate relative to latest successful workflow
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ENVGUARD_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: >-
+          envguard-ci investigate --project . --python "$(command -v python)"
+          --last-green github --github-workflow ci.yml
+          --baseline-ref "$ENVGUARD_DEFAULT_BRANCH"
+          --baseline-artifact envguard-ci.json
+          --snapshot-out envguard-ci.json --report-out envguard-report.json
+          -- python -m unittest discover -s tests -q
+      - name: Preserve diagnostic reports even on failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: envguard-diagnostics
+          path: |
+            envguard-report.json
+            envguard-report.md
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Keep green snapshot for subsequent runs
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: envguard-baseline
+          path: envguard-ci.json
+          if-no-files-found: error
+          retention-days: 14
+
+  package-release-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install packaging verification tools
+        run: python -m pip install 'build>=1.2,<3' 'twine>=6,<8'
+      - name: Build wheel and source distribution
+        run: python -m build
+      - name: Verify distribution metadata
+        run: python -m twine check dist/*
+      - name: Verify release archive hygiene
+        run: python scripts/verify_release.py --dist dist
+      - name: Install release wheel from outside source tree and reproduce failure
+        run: python scripts/smoke_release.py --dist dist
+      - name: Upload validated distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-distributions
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 7

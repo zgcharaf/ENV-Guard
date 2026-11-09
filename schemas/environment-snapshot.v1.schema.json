@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/envguard/environment-snapshot.v1.schema.json",
+  "title": "EnvGuard EnvironmentSnapshot V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "captured_at", "project", "runtime", "platform", "packages", "native", "fingerprints"],
+  "properties": {
+    "schema_version": {"const": "1.0"},
+    "captured_at": {"type": "string", "format": "date-time"},
+    "project": {
+      "type": "object",
+      "required": ["files", "detected_managers", "requires_python", "dependencies"],
+      "properties": {
+        "files": {
+          "type": "array", "items": {"type": "object", "required": ["name", "sha256"],
+            "properties": {"name": {"type": "string"}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}
+          }
+        },
+        "detected_managers": {"type": "array", "items": {"type": "string"}},
+        "requires_python": {"type": ["string", "null"]},
+        "dependencies": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "runtime": {
+      "type": "object", "required": ["version", "implementation", "soabi", "environment_kind", "executable_name"],
+      "properties": {
+        "version": {"type": "string"}, "implementation": {"type": "string"},
+        "soabi": {"type": ["string", "null"]}, "environment_kind": {"type": "string"},
+        "executable_name": {"type": "string"}
+      }
+    },
+    "platform": {
+      "type": "object", "required": ["os", "arch", "libc"],
+      "properties": {"os": {"type": "string"}, "arch": {"type": "string"}, "libc": {"type": ["string", "null"]}}
+    },
+    "packages": {
+      "type": "array", "items": {
+        "type": "object", "required": ["name", "version"],
+        "properties": {
+          "name": {"type": "string"}, "version": {"type": "string"},
+          "requires": {"type": "array", "items": {"type": "string"}},
+          "wheel_tags": {"type": "array", "items": {"type": "string"}},
+          "origin_hash": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "native": {
+      "type": "object", "required": ["scan_status", "libraries", "requirements"],
+      "properties": {
+        "scan_status": {"enum": ["disabled", "unsupported", "partial", "complete"]},
+        "libraries": {"type": "array", "items": {"type": "string"}},
+        "requirements": {"type": "array", "items": {"type": "object"}},
+        "provided_symbols": {"type": "object"},
+        "notes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "fingerprints": {
+      "type": "object", "required": ["spec", "runtime", "artifact"],
+      "properties": {
+        "spec": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "runtime": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "artifact": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "cases": [
+    {
+      "drift_findings": [],
+      "exit_code": 0,
+      "expected": null,
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": null,
+      "scenario": "healthy"
+    },
+    {
+      "drift_findings": [
+        "PACKAGE_MISSING",
+        "UNSATISFIED_RUNTIME_DEPENDENCY"
+      ],
+      "exit_code": 1,
+      "expected": "MISSING_DISTRIBUTION_AT_RUNTIME",
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": "MISSING_DISTRIBUTION_AT_RUNTIME",
+      "scenario": "missing_dependency"
+    },
+    {
+      "drift_findings": [
+        "PACKAGE_MISSING",
+        "UNSATISFIED_RUNTIME_DEPENDENCY"
+      ],
+      "exit_code": 1,
+      "expected": "WRONG_PYTHON_INTERPRETER",
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": "WRONG_PYTHON_INTERPRETER",
+      "scenario": "wrong_interpreter"
+    },
+    {
+      "drift_findings": [],
+      "exit_code": 1,
+      "expected": "PYTHON_SITE_DISABLED",
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": "PYTHON_SITE_DISABLED",
+      "scenario": "site_disabled"
+    },
+    {
+      "drift_findings": [
+        "PACKAGE_VERSION_DRIFT",
+        "UNSATISFIED_VERSION_CONSTRAINT"
+      ],
+      "exit_code": 1,
+      "expected": "PACKAGE_API_VERSION_INCOMPATIBILITY",
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": "PACKAGE_API_VERSION_INCOMPATIBILITY",
+      "scenario": "old_dependency_api"
+    },
+    {
+      "drift_findings": [
+        "PACKAGE_VERSION_DRIFT"
+      ],
+      "exit_code": 0,
+      "expected": null,
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": null,
+      "scenario": "compatible_upgrade"
+    },
+    {
+      "drift_findings": [],
+      "exit_code": 1,
+      "expected": null,
+      "is_non_environment_failure": true,
+      "passed": true,
+      "predicted": null,
+      "scenario": "business_assertion_failure"
+    },
+    {
+      "drift_findings": [
+        "PACKAGE_MISSING",
+        "UNSATISFIED_RUNTIME_DEPENDENCY"
+      ],
+      "exit_code": 1,
+      "expected": "PACKAGE_RESOLUTION_UNAVAILABLE",
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": "PACKAGE_RESOLUTION_UNAVAILABLE",
+      "scenario": "installer_unavailable"
+    },
+    {
+      "drift_findings": [
+        "PACKAGE_MISSING",
+        "UNSATISFIED_RUNTIME_DEPENDENCY"
+      ],
+      "exit_code": 1,
+      "expected": "DEPENDENCY_RESOLUTION_CONFLICT",
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": "DEPENDENCY_RESOLUTION_CONFLICT",
+      "scenario": "installer_conflict"
+    },
+    {
+      "drift_findings": [],
+      "exit_code": 1,
+      "expected": "NATIVE_LIBRARY_LOAD_FAILURE",
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": "NATIVE_LIBRARY_LOAD_FAILURE",
+      "scenario": "native_library_missing"
+    },
+    {
+      "drift_findings": [],
+      "exit_code": 1,
+      "expected": "NATIVE_SYMBOL_LOAD_FAILURE",
+      "is_non_environment_failure": false,
+      "passed": true,
+      "predicted": "NATIVE_SYMBOL_LOAD_FAILURE",
+      "scenario": "native_symbol_mismatch"
+    }
+  ],
+  "metrics": {
+    "benign_controls": 2,
+    "benign_false_alarms": 0,
+    "caveat": "Controlled injected failure-category labels, NOT independent root-cause accuracy on enterprise CI incidents.",
+    "controlled_cases": 11,
+    "correct_injected_labels_at_1": 8,
+    "correct_root_cause_at_1": 8,
+    "elapsed_seconds": 19.7,
+    "failed_cases": 8,
+    "injected_label_accuracy_at_1": 1.0,
+    "root_cause_accuracy_at_1": 1.0,
+    "skipped_cases": 0,
+    "unrelated_failing_controls": 1,
+    "unrelated_failure_false_alarms": 0
+  },
+  "version": "1.0"
+}

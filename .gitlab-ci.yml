@@ -1,0 +1,61 @@
+stages:
+  - test
+  - package
+
+envguard-ci:tests:
+  stage: test
+  image: python:3.12-slim
+  variables:
+    PYTHONDONTWRITEBYTECODE: "1"
+  script:
+    - python -m pip install -e .
+    - envguard-ci investigate --project . --python "$(command -v python)" --last-green gitlab --baseline-ref "$CI_DEFAULT_BRANCH" --baseline-job envguard-ci:tests --baseline-artifact envguard-ci.json --snapshot-out envguard-ci.json --report-out envguard-report.json -- python -m unittest discover -s tests -v
+  after_script:
+    - |
+      if test -f envguard-report.json; then
+        python -m envguard_ci render-report --input envguard-report.json --format gitlab-codequality --out envguard-codequality.json
+      else
+        printf '[]\n' > envguard-codequality.json
+      fi
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - envguard-ci.json
+      - envguard-report.json
+      - envguard-report.md
+      - envguard-codequality.json
+    reports:
+      codequality: envguard-codequality.json
+
+envguard-ci:failure-lab:
+  stage: test
+  image: python:3.12-bookworm
+  script:
+    - python -m pip install -e .
+    - python examples/run_failure_demo.py
+    - python examples/run_v1_repair_demo.py
+    - python lab/run_lab.py --out lab-results
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - lab-results/benchmark.json
+      - lab/.envguard-runs/demo-ci-report.json
+      - lab/.envguard-runs/demo-ci-report.md
+
+envguard-ci:release-gate:
+  stage: package
+  image: python:3.12-slim
+  script:
+    - python -m pip install 'build>=1.2,<3' 'twine>=6,<8'
+    - python -m build
+    - python -m twine check dist/*
+    - python scripts/verify_release.py --dist dist
+    - python scripts/smoke_release.py --dist dist
+  artifacts:
+    when: on_success
+    expire_in: 7 days
+    paths:
+      - dist/*.whl
+      - dist/*.tar.gz

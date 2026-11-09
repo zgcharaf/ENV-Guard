@@ -1,4 +1,4 @@
-# EnvGuard CI v1.0.0rc2 — evidence-led release candidate
+# EnvGuard CI v1.0.0rc1 — evidence-led release candidate
 
 **Diagnose Python CI environment drift, verify wheel bytes, and run constrained recovery experiments.**
 
