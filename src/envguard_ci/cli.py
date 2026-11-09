@@ -23,6 +23,7 @@ from .artifacts import inspect_wheel, ArtifactError
 from .verification import verify_interpreter_selection, VerificationError
 from .certify import certify_wheel, CertificationError
 from .github import fetch_github_baseline, GitHubError
+from .wheel_abi import inspect_wheel_abi, capture_native_target, WheelABIError
 
 _PRIORITIES = {"critical": 0, "high": 1, "medium": 2, "low": 3, "info": 4}
 
@@ -87,6 +88,15 @@ def _parse() -> argparse.ArgumentParser:
     wh.add_argument("--wheel", required=True)
     wh.add_argument("--approved-sha256")
     wh.add_argument("--out", default="-")
+    abi = sub.add_parser("inspect-wheel-abi", help="Static ELF version requirements inside a wheel; optional explicit target provider manifest")
+    abi.add_argument("--wheel", required=True, help="Reviewed .whl to inspect, no import/installation")
+    abi.add_argument("--approved-sha256", help="Optional expected SHA-256 of the wheel")
+    abi.add_argument("--member", help="Inspect one exact ELF .so member (useful for large wheels)")
+    abi.add_argument("--target-manifest", help="JSON from capture-native-target on intended Linux runtime")
+    abi.add_argument("--fail-on-shortfall", action="store_true", help="Exit 1 when an observed provider lacks a required version label")
+    abi.add_argument("--out", default="-")
+    tgt = sub.add_parser("capture-native-target", help="Read ELF symbol definitions of local Linux ldconfig providers")
+    tgt.add_argument("--out", default="-")
     ve = sub.add_parser("verify-interpreter", help="Explicit local experiment: compare two Python interpreters running same program")
     ve.add_argument("--project", default=".")
     ve.add_argument("--original-python", required=True)
@@ -212,6 +222,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "inspect-wheel":
             write_json(inspect_wheel(args.wheel, approved_sha256=args.approved_sha256), args.out)
             return 0
+        if args.command == "inspect-wheel-abi":
+            report = inspect_wheel_abi(args.wheel, approved_sha256=args.approved_sha256,
+                                       target_manifest=args.target_manifest, member=args.member)
+            write_json(report, args.out)
+            return int(args.fail_on_shortfall and report["comparison"]["status"] == "potential_provider_symbol_gap")
+        if args.command == "capture-native-target":
+            write_json(capture_native_target(), args.out)
+            return 0
         if args.command == "verify-interpreter":
             command = args.exec[1:] if args.exec and args.exec[0] == "--" else args.exec
             verification = verify_interpreter_selection(project=args.project,
@@ -328,6 +346,6 @@ def main(argv: list[str] | None = None) -> int:
             raise AssertionError(args.command)
         _emit(result, args.format, args.out)
         return _exit_code(result, args.fail_on)
-    except (SnapshotError, CollectionError, GitLabError, GitHubError, ArtifactError, VerificationError, CertificationError, ValueError, OSError) as exc:
+    except (SnapshotError, CollectionError, GitLabError, GitHubError, ArtifactError, WheelABIError, VerificationError, CertificationError, ValueError, OSError) as exc:
         print(f"envguard-ci: {exc}", file=sys.stderr)
         return 2
