@@ -1,6 +1,6 @@
 # EnvGuard CI — Python CI diagnostics
 
-**Documentation:** [Academic website](https://zgcharaf.github.io/ENV-Guard/) · [Complete reference manual](https://zgcharaf.github.io/ENV-Guard/docs/) · [Seven tutorials](https://zgcharaf.github.io/ENV-Guard/tutorials/)
+**Documentation:** [Academic website](https://zgcharaf.github.io/ENV-Guard/) · [Complete reference manual](https://zgcharaf.github.io/ENV-Guard/docs/) · [Seven tutorials](https://zgcharaf.github.io/ENV-Guard/tutorials/) · [Research & benchmarks](https://zgcharaf.github.io/ENV-Guard/research/)
 
 **Current source release:** `1.0.0rc2` (experimental; no production guarantees). The historical sections below document older releases and should be interpreted accordingly.
 

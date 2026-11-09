@@ -4,6 +4,7 @@ The public site for [EnvGuard CI](https://github.com/zgcharaf/ENV-Guard).
 
 - **Homepage**: [index.html](index.html)
 - **Reference manual**: [docs/index.html](docs/index.html)
+- **Research and benchmarks**: [research/index.html](research/index.html)
 - **Seven worked tutorials**: [tutorials/index.html](tutorials/index.html)
 
 The design follows a restrained academic/LaTeX aesthetic: a serif document hierarchy, thin rules, numbered sections, a typeset abstract, table-based evidence, print styles, and restrained mono code samples.
@@ -14,7 +15,7 @@ The design follows a restrained academic/LaTeX aesthetic: a serif document hiera
 python -m http.server 8000 --directory website
 ```
 
-Open http://localhost:8000, http://localhost:8000/docs/, and http://localhost:8000/tutorials/.
+Open http://localhost:8000, http://localhost:8000/docs/, and http://localhost:8000/tutorials/, and http://localhost:8000/research/.
 
 No framework, NPM, custom fonts, CDN, cookies, telemetry, or backend required.
 

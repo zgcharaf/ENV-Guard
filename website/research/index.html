@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#faf9f6">
+<meta name="description" content="EnvGuard CI research: reproducible fault-injection results, public CI evidence, independent evaluation methodology, and transparent comparator plans.">
+<link rel="icon" href="../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="../styles.css"><script src="../app.js" defer></script>
+<title>Research &amp; Benchmarks — EnvGuard CI</title>
+</head><body>
+<a class="skip-link" href="#main">Skip to research</a>
+<header class="masthead"><div class="masthead-inner">
+<a class="wordmark" href="../"><span class="symbol">E<span class="symbol-dot">·</span>G</span><span class="wordmark-name">EnvGuard <span>CI</span></span></a>
+<nav aria-label="Main navigation"><a href="../">Home</a><a href="../docs/">Documentation</a><a href="../tutorials/">Tutorials</a><a href="./" aria-current="page">Research</a><a href="https://github.com/zgcharaf/ENV-Guard" rel="noopener noreferrer">GitHub ↗</a></nav>
+</div></header>
+<div class="doc-frame" id="main">
+<aside class="toc" aria-label="Research sections">
+<h2>Research notebook</h2>
+<a href="#abstract">Abstract</a>
+<a href="#evidence"><span class="toc-number">1.</span> Evidence hierarchy</a>
+<a href="#controlled"><span class="toc-number">2.</span> Controlled experiment</a>
+<a href="#cases"><span class="toc-number">3.</span> Per-case results</a>
+<a href="#hosted"><span class="toc-number">4.</span> Hosted CI incidents</a>
+<a href="#comparators"><span class="toc-number">5.</span> Comparator design</a>
+<a href="#protocol"><span class="toc-number">6.</span> Independent benchmark</a>
+<a href="#metrics"><span class="toc-number">7.</span> Evaluation metrics</a>
+<a href="#reproduce"><span class="toc-number">8.</span> Reproduction</a>
+<a href="#validity"><span class="toc-number">9.</span> Threats to validity</a>
+<a href="#contribute"><span class="toc-number">10.</span> Contribute cases</a>
+<div class="toc-group">Resources</div>
+<a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/BENCHMARK_PROTOCOL.md">Full protocol ↗</a>
+<a href="https://github.com/zgcharaf/ENV-Guard/blob/main/examples/controlled-benchmark.json">Observed sample JSON ↗</a>
+<a href="../docs/">Reference manual →</a>
+</aside>
+<article class="doc-article">
+<div class="doc-meta">Research record · v1.0.0rc2 · 9 November 2026</div>
+<h1>Research &amp; benchmarks</h1>
+<p class="doc-lead">A reproducible evaluation of Python CI failure diagnostics—with an explicit separation between synthetic fault injection, hosted CI evidence, and independent field accuracy.</p>
+<div class="abstract" id="abstract"><span class="abstract-title">Abstract</span>
+<p>EnvGuard CI has demonstrated exact matches to known developer-injected fault labels in a controlled offline laboratory. It has also operated on hosted CI runners, including a deliberately incorrect Python interpreter. These observations support further evaluation; they do not establish general causal accuracy, superiority over package managers, or enterprise readiness. This page reports what has been measured, explains how to reproduce it, and defines the independent benchmark required before broader performance claims.</p></div>
+<div class="note"><p><strong>Claim discipline.</strong> All published numerical outcomes below originate from <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/examples/controlled-benchmark.json">the committed sample run</a>. No competitor benchmark has been executed and published yet.</p></div>
+
+<section id="evidence">
+<h2>1. Evidence hierarchy</h2>
+<table><thead><tr><th>Evidence class</th><th>Available?</th><th>Permitted conclusion</th></tr></thead><tbody>
+<tr><td>Executed controlled offline failures</td><td>Yes</td><td>Exact agreement with known injected labels for the defined cases</td></tr>
+<tr><td>Hosted GitHub Actions test runs</td><td>Yes</td><td>Workflows ran and passed their particular checks</td></tr>
+<tr><td>Hosted GitLab synthetic incident</td><td>Yes, historical pilot</td><td>Wrong-interpreter symptom, corresponding EnvGuard hypothesis, retained artifacts</td></tr>
+<tr><td>Independent historical failures</td><td>Not yet</td><td>No field accuracy estimate</td></tr>
+<tr><td>Measured head-to-head study</td><td>Not yet</td><td>No relative accuracy or speed claim</td></tr>
+</tbody></table>
+<p>Cases with author-known injected labels are useful for regression tests, but they provide a biased estimate of performance on unseen incidents. For a stronger claim, fault labels must be verified without relying on EnvGuard's diagnosis.</p>
+</section>
+
+<section id="controlled">
+<h2>2. Controlled fault-injection study</h2>
+<p>The repository's executable lab builds local Python wheels, constructs disposable virtual environments and triggers actual subprocess failures. On Linux with a C++ compiler it also builds native shared libraries for missing-library and missing-symbol experiments.</p>
+<div class="method-grid">
+<div><span class="step-id">11 CASES</span><h3>All evaluated</h3><p>Eight injected environmental failures; two benign controls; one non-environment failing control.</p></div>
+<div><span class="step-id">8 / 8</span><h3>Label agreement</h3><p>Eight exact matches between reported cause and known developer-injected failure label.</p></div>
+<div><span class="step-id">0 / 3</span><h3>Control false alarms</h3><p>No specific environmental attribution on the two healthy or one unrelated failing control.</p></div>
+</div>
+<p><strong>Sampling limitation.</strong> All eleven scenarios use a closely related synthetic project, not eleven independently sampled projects. The historical metric <code>root_cause_accuracy_at_1 = 1.0</code> is a legacy name; it should be cited as <em>injected-label agreement</em>, not field root-cause accuracy.</p>
+<figure class="incident-figure">
+<div class="figure-header"><span>Observed study summary — one recorded controlled run</span><span>n = 11</span></div>
+<div class="figure-body"><dl>
+<dt>Injected failures</dt><dd>8</dd>
+<dt>Exact label matches</dt><dd>8 of 8</dd>
+<dt>Benign controls</dt><dd>2 of 2 without environmental attribution</dd>
+<dt>Unrelated failing control</dt><dd>1 of 1 without environmental attribution</dd>
+<dt>Recorded wall-clock</dt><dd>19.7 seconds for that sample run; <em>not</em> a comparative timing measurement</dd>
+<dt>Skipped in sample</dt><dd>0 (native Linux cases available)</dd>
+</dl></div>
+<figcaption>Table 1. <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/examples/controlled-benchmark.json">Machine-readable result</a>. Numbers are descriptive for the recorded run; no population-level confidence interval is claimed.</figcaption>
+</figure>
+</section>
+
+<section id="cases">
+<h2>3. Per-case outcomes</h2>
+<p>Here, “correct” means agreement with the fault class injected by the lab author. A null diagnosis on a healthy or non-environment control is intentional.</p>
+<table><thead><tr><th>Scenario</th><th>Expected classification</th><th>Recorded outcome</th></tr></thead><tbody>
+<tr><td><code>missing_dependency</code></td><td>Missing runtime distribution</td><td>Matched</td></tr>
+<tr><td><code>wrong_interpreter</code></td><td>Wrong Python interpreter</td><td>Matched</td></tr>
+<tr><td><code>site_disabled</code></td><td>Python <code>-S</code> disabled site initialization</td><td>Matched</td></tr>
+<tr><td><code>old_dependency_api</code></td><td>Package API/version incompatible</td><td>Matched</td></tr>
+<tr><td><code>installer_unavailable</code></td><td>Resolution unavailable offline</td><td>Matched</td></tr>
+<tr><td><code>installer_conflict</code></td><td>Constraint resolution conflict</td><td>Matched</td></tr>
+<tr><td><code>native_library_missing</code></td><td>Native shared library missing</td><td>Matched</td></tr>
+<tr><td><code>native_symbol_mismatch</code></td><td>Native symbol load failure</td><td>Matched</td></tr>
+<tr><td><code>healthy</code></td><td>No environmental cause</td><td>No attribution</td></tr>
+<tr><td><code>compatible_upgrade</code></td><td>No environmental cause</td><td>No attribution</td></tr>
+<tr><td><code>business_assertion_failure</code></td><td>Non-environment application failure</td><td>No attribution</td></tr>
+</tbody></table>
+<p>The exact labels, exit codes and drift findings are preserved in <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/examples/controlled-benchmark.json">the JSON record</a>. The lab implementation is <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/lab/run_lab.py">auditable source</a>; the study can be rerun under another OS/Python version.</p>
+</section>
+
+<section id="hosted">
+<h2>4. Hosted CI evidence and incident records</h2>
+<h3>Case H1 — GitHub Actions controlled failure, November 2026</h3>
+<p>The <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42619255881">initial GitHub Actions run</a> executed a synthetic wrong-interpreter scenario and logged a <code>No module named riskbatch</code> error. EnvGuard reported <code>WRONG_PYTHON_INTERPRETER</code>. That workflow was <strong>not</strong> an unqualified success: a brittle assertion in the demo's Markdown validation failed, and an outdated release smoke-test version check failed separately. We keep that run visible because failed tests are part of the empirical record.</p>
+<h3>Case H2 — Successful GitHub quality gates</h3>
+<p>The subsequent <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42652589626">hosted CI run</a> completed successfully across the supported test matrix and release/lab jobs. This demonstrates integration and regression behavior on the tested runner configurations, not independent accuracy on novel failures.</p>
+<h3>Case H3 — GitLab wrong-interpreter pilot</h3>
+<p>The separate <a href="https://gitlab.com/envguardci-group/envguard-gitlab-pilot">GitLab pilot repository</a> has previously executed an intentionally failing job with two virtual environments: the package was installed in an intended environment, while the failing command used another interpreter. Its evidence report classified the wrong-interpreter failure, and GitLab retained the diagnostic artifacts. The pilot is a real hosted run of a <em>synthetic</em> incident, not an independently discovered production outage.</p>
+<div class="note"><p><strong>No production claims.</strong> Public real-world incident candidates from outside the project still need independent root-cause adjudication, permission to reuse evidence, and held-out evaluation. They are not silently counted as solved.</p></div>
+</section>
+
+<section id="comparators">
+<h2>5. Comparator methodology</h2>
+<p>We propose a paired comparison with two established dependency consistency tools: <a href="https://pip.pypa.io/en/stable/cli/pip_check/">pip check</a> and <a href="https://docs.astral.sh/uv/">uv</a>. Both are valuable tools, but their <code>pip check</code> commands address installed dependency metadata consistency rather than full CI root-cause attribution. It would be unfair to score them as incorrect for not diagnosing an unexpected Python executable or a broken native loader.</p>
+<table><thead><tr><th>Question</th><th>EnvGuard</th><th>pip check</th><th>uv pip check</th></tr></thead><tbody>
+<tr><td>Inspect installed dependency compatibility</td><td>Supported diagnostic checks</td><td>Intended capability</td><td>Intended capability</td></tr>
+<tr><td>Detect mismatch of intended vs directly executed Python</td><td>Supported when execution evidence is explicit</td><td>Not its stated objective</td><td>Not its stated objective</td></tr>
+<tr><td>Classify native loader errors</td><td>Selected signatures and Linux checks</td><td>Not its stated objective</td><td>Not its stated objective</td></tr>
+<tr><td>Generate structured CI incident dossier</td><td>Supported</td><td>Not its stated objective</td><td>Not its stated objective</td></tr>
+<tr><td>Measured performance in a matched comparison</td><td colspan="3"><em>Not yet published</em></td></tr>
+</tbody></table>
+<p>The accompanying <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/compare_tools.py">comparison runner</a> records exit statuses, tool versions and timings on exactly the same lab virtualenvs. It focuses on the metadata-related subcases when discussing metadata-check behavior. A nonzero checker exit status is a <em>signal</em>, not an exact failure-cause label.</p>
+</section>
+
+<section id="protocol">
+<h2>6. A held-out benchmark of real incidents</h2>
+<p>We propose an independent collection of at least 50 historical Python CI incidents across multiple maintainers and projects. Each candidate should have a failing revision, a relevant working baseline, redacted logs and an independently verified correction. Two adjudicators should review the causal label without seeing EnvGuard's prediction; disagreements should remain explicit.</p>
+<ol>
+<li><strong>Register the cases.</strong> Fix inclusion criteria and an anonymous incident identifier. Keep an explicit <code>UNKNOWN</code> category when the evidence is insufficient.</li>
+<li><strong>Freeze the environment.</strong> Pin tool versions, repository commits, Python interpreters, OS images and permitted artifacts. Reset the environment between trials.</li>
+<li><strong>Predeclare scope.</strong> Distinguish general application failures from package metadata issues and environment/ABI failures. Report coverage separately from accuracy.</li>
+<li><strong>Blind the evaluator.</strong> Withhold fixing commits and reviewer labels from the tool and from human operators measuring investigation time.</li>
+<li><strong>Measure both correctness and harm.</strong> Record correct attribution, unsupported attribution, abstention, evidence quality, runtime and time-to-diagnosis.</li>
+<li><strong>Publish the failures too.</strong> Retain anonymized per-case results and study deviations, not only headline means.</li>
+</ol>
+</section>
+
+<section id="metrics">
+<h2>7. Evaluation metrics</h2>
+<p>For eligible, independently labeled cases, report:</p>
+<div class="definition"><span class="definition-label">Primary endpoint</span><p><em>Correct attribution@1 = (independently verified exact-cause predictions) / (independently labeled in-scope incidents).</em></p></div>
+<table><thead><tr><th>Metric</th><th>Purpose</th></tr></thead><tbody>
+<tr><td>In-scope attribution@1</td><td>Exact labels on eligible cases; report a confidence interval</td></tr>
+<tr><td>Coverage</td><td>Fraction of all sampled incidents a tool claims to support</td></tr>
+<tr><td>Unsupported attribution rate</td><td>Wrong environmental causes asserted on negative controls</td></tr>
+<tr><td>Abstention rate</td><td>Frequency of explicit uncertainty rather than unsupported guesses</td></tr>
+<tr><td>Evidence fidelity</td><td>Human-reviewed proportion of claims linked to reproducible observations</td></tr>
+<tr><td>Paired investigation time</td><td>Human time to a correct diagnosis with randomized tool order</td></tr>
+</tbody></table>
+<p>Tool execution time alone does not approximate the time saved for an engineer. Confidence intervals must reflect the sample size and repeated incidents from the same project.</p>
+</section>
+
+<section id="reproduce">
+<h2>8. Reproducing the experiments</h2>
+<p>The following workflow is designed for a local checkout or disposable CI runner. Use a Linux machine with a C++ compiler to include native cases; inspect the skip counter on other platforms.</p>
+<div class="code-example"><div class="code-caption"><span>Step A · Generate the injected-fault lab (local artifacts only)</span><button class="copy" type="button">Copy</button></div><pre><code>git clone https://github.com/zgcharaf/ENV-Guard.git
+cd ENV-Guard
+python -m pip install -e .
+python lab/run_lab.py --out research-results/lab
+python -m json.tool research-results/lab/benchmark.json</code></pre></div>
+<div class="code-example"><div class="code-caption"><span>Step B · Optional paired metadata checks</span><button class="copy" type="button">Copy</button></div><pre><code>python -m pip install uv
+python research/compare_tools.py \
+  --lab-output research-results/lab \
+  --out research-results/comparison.json \
+  --require-uv</code></pre></div>
+<p>This optional runner must be executed before reporting any comparator figures. It inspects the disposable environments without modifying packages, disables package-index lookups and stores hashed outputs, statuses and tool versions. Version-specific command support should be checked before treating any tool failure as meaningful.</p>
+<div class="code-example"><div class="code-caption"><span>Step C · Preserve the environment and revision</span><button class="copy" type="button">Copy</button></div><pre><code>git rev-parse HEAD
+python --version
+python -m pip --version
+uv --version</code></pre></div>
+<p>For full methods, data fields, and interpretation, see the <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/BENCHMARK_PROTOCOL.md">research protocol</a>.</p>
+</section>
+
+<section id="validity">
+<h2>9. Threats to validity</h2>
+<p><strong>Construct validity.</strong> The injected failure label is known in advance and may correlate with the diagnostics already implemented. <strong>External validity.</strong> Most cases share a single synthetic Python project and do not represent public-package, private-index, cross-language or enterprise production complexity. <strong>Measurement validity.</strong> The recorded 19.7 seconds is total lab execution time, not a cross-tool speed advantage. <strong>Comparability.</strong> A dependency consistency checker is not an incident classifier and should not be evaluated with the wrong target metric.</p>
+<p><strong>Security and research ethics.</strong> Real incidents can disclose dependency inventories, internal repository names and credentials. No sensitive employer data or raw private logs should be published without authorization. Independent labels may remain uncertain even after a patch is merged.</p>
+</section>
+
+<section id="contribute">
+<h2>10. Contribute a reproducible incident</h2>
+<p>Submissions should contain a minimal project, failing and working execution context, redacted observed logs, the adjudicated explanation (with supporting evidence) and permission to redistribute. An issue describing only an error message is a candidate for investigation, not a ground-truth benchmark item.</p>
+<div class="front-actions" style="justify-content:flex-start">
+<a class="primary-action" href="https://github.com/zgcharaf/ENV-Guard/issues" rel="noopener noreferrer">Propose an incident ↗</a>
+<a class="secondary-action" href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/dataset-template.csv">Dataset schema ↗</a>
+</div>
+<div class="ref-footer"><p><strong>Citation guidance.</strong> Cite the JSON, run identifier, tool revision and experimental scope—not just “100% accuracy.” When outside incidents are independently evaluated, this record will be extended with per-case evidence and comparison results.</p>
+<p><a href="../">Homepage →</a> · <a href="../docs/">Reference manual →</a> · <a href="../tutorials/">Tutorials →</a></p></div>
+</section>
+</article></div>
+<footer class="site-footer"><span>EnvGuard CI · Research notebook · Recorded vs proposed results distinguished</span><span><a href="../">Home</a> · <a href="https://github.com/zgcharaf/ENV-Guard">GitHub</a></span></footer>
+</body></html>
