@@ -20,7 +20,7 @@ envguard-ci capture-native-target --out target-native.json
 envguard-ci inspect-wheel-abi --wheel /path/to/package.whl --out abi.json
 ```
 
-For large wheels, use `--member package/extension.so` to inspect one exact ELF member. Read the [native ABI guide](docs/native-abi.md). The archived v1.0.0rc2 release wheel does **not** include these newer development commands; no claim of production compatibility is made.
+For large wheels, use `--member package/extension.so` to inspect one exact ELF member. Read the [native ABI guide](docs/native-abi.md). The static CLI was tested on [two official CasADi ARM64 wheels](https://github.com/zgcharaf/ENV-Guard/actions/runs/42675725738); the [observed proof](research/public-exemplars/ABI-0001-cli-observed-2026-11-09.json) is preserved with a nonblind development-example label. The archived v1.0.0rc2 release wheel does **not** include these newer development commands; no claim of production compatibility is made.
 
 ## External native-ABI case study
 

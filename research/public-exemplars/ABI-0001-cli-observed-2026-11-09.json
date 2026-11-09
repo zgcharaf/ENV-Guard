@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "kind": "static_wheel_abi_cli_hosted_observation",
+  "case_id": "ABI-0001",
+  "observed_date": "2026-11-09",
+  "source_issue": "https://github.com/casadi/casadi/issues/4402",
+  "envguard_source_commit": "839cf534367ab65955f8703bd872e7261a39af79",
+  "github_actions_run": "https://github.com/zgcharaf/ENV-Guard/actions/runs/42675725738",
+  "github_actions_job": 129356436100,
+  "github_actions_artifact": "https://github.com/zgcharaf/ENV-Guard/actions/runs/42675725738/artifacts/13698404902",
+  "test_method": "SHA256-verified published ARM64 wheels statically parsed by envguard-ci inspect-wheel-abi --member casadi/_casadi.so; no wheel binary imported or executed",
+  "study_role": "known_issue_development_regression",
+  "blind_accuracy_eligible": false,
+  "target_runtime_checked": false,
+  "reported_observations": [
+    {
+      "version": "3.8.0",
+      "wheel_sha256": "09ef0eea952cd7db0cfd8c0e580e27a62898186b6220bc7fc6f390a4f868a6ae",
+      "max_required_glibcxx": "GLIBCXX_3.4.32"
+    },
+    {
+      "version": "3.8.2",
+      "wheel_sha256": "27d32e7ec82c4ad39ccfe35c743607484a126056169890dfef80df6f18b9799a",
+      "max_required_glibcxx": "GLIBCXX_3.4.21"
+    }
+  ],
+  "limit": "Only a selected ELF object per wheel. No target runtime loaded, no manylinux policy certification, and no blinded performance comparison."
+}

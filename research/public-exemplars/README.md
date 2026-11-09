@@ -15,6 +15,8 @@ The [permanent hosted observation JSON](CI-0002-observed-2026-11-09.json) is der
 
 **ABI-0001 is not an independently verified CI job.** This case shows a static symbol-version reduction in a disclosed public native-compatibility issue, not a verified import on target ARM64 hardware. See the [case study](https://zgcharaf.github.io/ENV-Guard/research/cases/abi-0001/).
 
+The new [experimental CLI regression proof](ABI-0001-cli-observed-2026-11-09.json) records a second hosted static scan of the two CasADi wheels using `inspect-wheel-abi`. It has permanent wheel digests, requirement observations, and explicit nonblind limitations. The original wheel contents were not loaded or imported.
+
 ## Strict boundaries
 
 - `holdout_eligible=false` is a **permanent** flag for disclosed cases.

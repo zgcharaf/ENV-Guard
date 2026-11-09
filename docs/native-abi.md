@@ -116,6 +116,8 @@ The new CLI can inspect such wheels as *static artifacts*. To claim an
 actual target library shortfall, collect provider evidence from an ARM64
 Linux machine. A target manifest from an x86_64 CI runner is **incomparable**.
 
+The new CLI was exercised on the **actual public CasADi ARM64 wheel binaries** in [this hosted regression run](https://github.com/zgcharaf/ENV-Guard/actions/runs/42675725738). Read the [permanent CLI evidence](../research/public-exemplars/ABI-0001-cli-observed-2026-11-09.json). The known public diagnosis was disclosed before this experiment, so these checks are not blind accuracy data.
+
 ## Known limitations
 
 - Linux ELF only. On Windows/macOS, GNU readelf must be available to inspect

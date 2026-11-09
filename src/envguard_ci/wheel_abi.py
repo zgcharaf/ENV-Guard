@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 from pathlib import Path
 import platform
 import re
@@ -23,8 +22,7 @@ import tempfile
 from typing import Any
 import zipfile
 
-from .artifacts import ArtifactError, inspect_wheel, MAX_FILES, MAX_UNCOMPRESSED
-from .model import write_json
+from .artifacts import inspect_wheel, MAX_FILES, MAX_UNCOMPRESSED
 
 MAX_ELF_MEMBER = 155_000_000
 MAX_EXTRACTED = 250_000_000
@@ -281,10 +279,13 @@ def inspect_wheel_abi(wheel: str, *, approved_sha256: str | None = None,
                    "source": (target.get("source") if target else None),
                    "architecture": (target.get("architecture") if target else None)},
         "objects": observations,
+        "scan_scope": {"selected_member": member, "only_selected_member": member is not None,
+                       "inspected_elf_count": len(observations)},
         "unsupported_non_elf_members": ignored,
         "comparison": comparison,
         "limitations": [
             "No wheel code was installed, imported, or executed; GNU readelf parses untrusted ELF bytes, not a secure sandbox.",
+            "When --member is used, other native wheel members are excluded and cannot be considered compatible.",
             "DT_NEEDED and symbol version records do not reveal all dlopen/dynamic loading requirements.",
             "Runtime loader paths, library overrides, host policies and platform tag compliance are not certified.",
             "The target manifest is explicit static evidence, not proof of which providers a process would load.",

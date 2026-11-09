@@ -47,7 +47,7 @@
 <li>Run <code>readelf --version-info</code> and record required <code>GLIBCXX</code> symbol versions.</li>
 <li>Compare the highest required versions and publish a bounded JSON result.</li>
 </ol>
-<p>The analysis uses a <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/replay_native_abi.py">dedicated research script</a>. It is not an advertised EnvGuard v1.0rc2 CLI command and does not perform dynamic library loading.</p>
+<p>The initial analysis used a <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/replay_native_abi.py">dedicated research script</a>. A <strong>new experimental CLI on the current source branch</strong>, <code>inspect-wheel-abi</code>, now inspects the same selected ELF objects using its general static-analysis path. Both approaches avoid dynamic library loading; the original archived v1.0rc2 wheel did not contain the new command.</p>
 </section>
 <section id="observations">
 <h2>3. Observed results</h2>
@@ -59,6 +59,7 @@
 <p><em>The maximum required GLIBCXX symbol version in the selected native extension declined between the two published wheels. That change is consistent with improved compatibility with older C++ runtimes, but actual imports were not tested here.</em></p></div>
 <p>The hosted workflow <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42667692620">completed successfully</a>. It produced a <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42667692620/artifacts/13697761637">machine-readable artifact</a> retained by GitHub for a limited period. A <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/public-exemplars/ABI-0001-observed-2026-11-09.json">permanent summarized evidence record</a> preserves the observed requirements, SHA-256 digests, run URL and limitations.</p>
 </section>
+<div class="note"><p><strong>New supported CLI regression:</strong> A later <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42675725738">hosted EnvGuard CLI run</a> independently scanned these exact two public wheels through <code>envguard-ci inspect-wheel-abi --member casadi/_casadi.so</code>, again observing <code>GLIBCXX_3.4.32</code> and <code>GLIBCXX_3.4.21</code>. The <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/public-exemplars/ABI-0001-cli-observed-2026-11-09.json">permanent CLI record</a> preserves wheel hashes and measured requirements. This is still a disclosed, nonblind static test, not a target-runtime import demonstration.</p></div>
 <section id="reproduction">
 <h2>4. Reproducing the static inspection</h2>
 <p>The script requires a Linux runner with <code>readelf</code> and network access to PyPI for the exact pinned wheels. It runs no third-party Python package code.</p>

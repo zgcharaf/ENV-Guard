@@ -182,6 +182,34 @@ class ABIWheelTests(unittest.TestCase):
                 with self.assertRaises(WheelABIError):
                     inspect_wheel_abi(str(wheel), target_manifest=str(target))
 
+    def test_exact_member_scope_not_full_wheel_attestation(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            wheel = make_wheel(root)
+            with patch("envguard_ci.wheel_abi._tool", return_value="readelf"), \
+                 patch("envguard_ci.wheel_abi._run_tool", side_effect=fake_readelf):
+                report = inspect_wheel_abi(str(wheel), member="abimock/libdummy.so")
+            self.assertTrue(report["scan_scope"]["only_selected_member"])
+            self.assertEqual(report["scan_scope"]["inspected_elf_count"], 1)
+            self.assertEqual(report["scan_scope"]["selected_member"], "abimock/libdummy.so")
+            self.assertIn("other native wheel members", " ".join(report["limitations"]))
+
+    def test_missing_selected_member_rejected(self):
+        with tempfile.TemporaryDirectory() as temp:
+            wheel = make_wheel(Path(temp))
+            with self.assertRaisesRegex(WheelABIError, "selected ELF member"):
+                inspect_wheel_abi(str(wheel), member="abimock/missing.so")
+
+    def test_hosted_external_evidence_excluded_from_blind_accuracy(self):
+        source = Path(__file__).resolve().parents[1] / "research" / "public-exemplars" / "ABI-0001-cli-observed-2026-11-09.json"
+        data = json.loads(source.read_text(encoding="utf-8"))
+        self.assertFalse(data["blind_accuracy_eligible"])
+        self.assertFalse(data["target_runtime_checked"])
+        self.assertEqual(
+            [(x["version"], x["max_required_glibcxx"]) for x in data["reported_observations"]],
+            [("3.8.0", "GLIBCXX_3.4.32"), ("3.8.2", "GLIBCXX_3.4.21")]
+        )
+
     def test_pure_python_has_no_elf(self):
         with tempfile.TemporaryDirectory() as temp:
             wheel = make_wheel(Path(temp), member="abimock/not-native.txt")
