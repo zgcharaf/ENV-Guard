@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "id": "CI-0002",
+  "source_repo": "cvsz/zbase",
+  "study_role": "public_development_exemplar",
+  "holdout_eligible": false,
+  "independently_blind_adjudicated": false,
+  "evidence_reviewed_on": "2026-11-09",
+  "original_failure": {
+    "issue": "https://github.com/cvsz/zbase/issues/19",
+    "workflow_run": "https://github.com/cvsz/zbase/actions/runs/42434561391",
+    "failing_commit": "3c33b3550ad79748d67bc0a34f2f5a578b8e11fa",
+    "jobs": [
+      {
+        "id": 128590526773,
+        "name": "lint and unit tests"
+      },
+      {
+        "id": 128590526601,
+        "name": "integration, S3 compatibility and security"
+      }
+    ],
+    "public_pins": {
+      "pytest": "9.0.3",
+      "pytest_asyncio": "1.2.0"
+    },
+    "observed_log_signature": "ResolutionImpossible: pytest-asyncio 1.2.0 requires pytest>=8.2,<9, incompatible with pytest==9.0.3",
+    "source_file": "https://github.com/cvsz/zbase/blob/3c33b3550ad79748d67bc0a34f2f5a578b8e11fa/requirements-dev.txt"
+  },
+  "merged_correction": {
+    "pull_request": "https://github.com/cvsz/zbase/pull/24",
+    "head_commit": "b78395783cbf8238df7cb9db5285a182013029c7",
+    "merge_commit": "d25dc3ae17e944328c935728eb001aa49d89e012",
+    "changed_line": "pytest-asyncio==1.2.0 -> pytest-asyncio==1.4.0",
+    "fixed_ci": "https://github.com/cvsz/zbase/actions/runs/42434951881",
+    "observed_ci_status": "success",
+    "observed_lint_test_log": "90 passed",
+    "observed_integration_log": "199 passed, 1 warning",
+    "source_file": "https://github.com/cvsz/zbase/blob/977b349f22b03c3850b24e0e10103fc92d37b4f1/requirements-dev.txt"
+  },
+  "scope_limits": [
+    "Evidence comes from a known public fix, not a blinded independent EnvGuard run.",
+    "Full third-party application tests are not executed by EnvGuard's minimal-pair replay.",
+    "Reproducing the pair with PyPI metadata is not equivalent to reproducing original exact dependency closure, OS, or CI job.",
+    "Do not score this public development case as held-out independent attribution accuracy."
+  ]
+}
