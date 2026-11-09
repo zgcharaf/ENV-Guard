@@ -4,6 +4,8 @@
 
 **Version:** v1.0.0rc2. **Study date:** 2026-11-09.
 
+**Public incident discovery (not ground truth):** [12 candidate leads](candidates.json) and [independent review protocol](CORPUS.md), as of 2026-11-09. No candidate has been independently adjudicated or scored.
+
 ## 1. Evidence registry and interpretation
 
 | Evidence | Category | Location | What it establishes |

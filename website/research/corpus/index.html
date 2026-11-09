@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#faf9f6">
+<meta name="description" content="EnvGuard CI public incident discovery corpus: screened GitHub issues, evidence status, review protocol, and limitations.">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../styles.css"><script defer src="../../app.js"></script>
+<title>Candidate incident corpus — EnvGuard CI</title>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to corpus</a>
+<header class="masthead"><div class="masthead-inner">
+<a class="wordmark" href="../../"><span class="symbol">E<span class="symbol-dot">·</span>G</span><span class="wordmark-name">EnvGuard <span>CI</span></span></a>
+<nav aria-label="Main navigation"><a href="../../">Home</a><a href="../../docs/">Documentation</a><a href="../../tutorials/">Tutorials</a><a href="../" aria-current="page">Research</a><a href="https://github.com/zgcharaf/ENV-Guard" rel="noopener noreferrer">GitHub ↗</a></nav>
+</div></header>
+<div class="doc-frame" id="main">
+<aside class="toc" aria-label="Corpus sections">
+<h2>Incident corpus</h2>
+<a href="#scope">Purpose &amp; scope</a>
+<a href="#candidates">Public candidates</a>
+<a href="#reviews">Review procedure</a>
+<a href="#protection">Leakage controls</a>
+<a href="#participate">Contribute</a>
+<div class="toc-group">Related work</div>
+<a href="../">Research &amp; benchmarks →</a>
+<a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/CORPUS.md">Full curation protocol ↗</a>
+<a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/candidates.json">JSON register ↗</a>
+</aside>
+<article class="doc-article">
+<div class="doc-meta">Public discovery register · Nov 9, 2026 · Not evaluated</div>
+<h1>Candidate incident corpus</h1>
+<p class="doc-lead">Public failure reports are starting points for scientific evaluation—not ground-truth answers by themselves.</p>
+<div class="abstract" id="scope"><span class="abstract-title">Study status</span><p>This queue records 12 GitHub issue leads. Six appear CI-related based on initial screening, six require further scope review. Some reports have been inspected; others were identified from issue-search summaries alone. There are <strong>zero independent adjudications</strong>, and none of these incidents contributes to EnvGuard's published root-cause accuracy.</p></div>
+<div class="method-grid">
+<div><span class="step-id">12 LINKS</span><h3>Discovery</h3><p>Public GitHub issue URLs. Not solved or reproduced by EnvGuard.</p></div>
+<div><span class="step-id">6 / 12</span><h3>Likely CI</h3><p>Preliminary eligibility only, pending precise failing-run verification.</p></div>
+<div><span class="step-id">0</span><h3>Ground-truth labels</h3><p>No blinded dual-review adjudications yet.</p></div>
+</div>
+<section id="candidates">
+<h2>1. Candidate register</h2>
+<p>Each entry links directly to its original public issue. The topic is only a discovery description; the failure cause may differ after examination. <em>Source reviewed</em> denotes the extent of inspection, not independent causal verification.</p>
+<table><thead><tr><th>Case</th><th>Original issue</th><th>Observed theme</th><th>Source reviewed</th><th>Scope screen</th></tr></thead>
+<tbody><tr><td><code>CI-0001</code></td><td><a href="https://github.com/fractal-analytics-platform/fractal-web/issues/1293" rel="noopener noreferrer">fractal-analytics-platform/fractal-web #1293</a></td><td>Runner image / SSL</td><td>Issue + comments read</td><td>Likely CI</td></tr>
+<tr><td><code>CI-0002</code></td><td><a href="https://github.com/cvsz/zbase/issues/19" rel="noopener noreferrer">cvsz/zbase #19</a></td><td>pip resolver conflict</td><td>Issue, comments + PR read</td><td>Likely CI</td></tr>
+<tr><td><code>CI-0003</code></td><td><a href="https://github.com/2AMLogic/gf180-pll/issues/810" rel="noopener noreferrer">2AMLogic/gf180-pll #810</a></td><td>Python/wheel compatibility</td><td>Issue + comments read</td><td>Likely CI</td></tr>
+<tr><td><code>CI-0004</code></td><td><a href="https://github.com/FastLED/fbuild/issues/1781" rel="noopener noreferrer">FastLED/fbuild #1781</a></td><td>Missing CI test module</td><td>Issue read</td><td>Likely CI</td></tr>
+<tr><td><code>CI-0005</code></td><td><a href="https://github.com/MarcusJellinghaus/mcp_coder/issues/1243" rel="noopener noreferrer">MarcusJellinghaus/mcp_coder #1243</a></td><td>Jenkins dependency drift</td><td>Issue read</td><td>Likely CI</td></tr>
+<tr><td><code>CI-0006</code></td><td><a href="https://github.com/ultralytics/ultralytics/issues/27011" rel="noopener noreferrer">ultralytics/ultralytics #27011</a></td><td>Wheel availability</td><td>Search summary</td><td>Likely CI</td></tr>
+<tr><td><code>CI-0007</code></td><td><a href="https://github.com/qim-center/qim3d/issues/166" rel="noopener noreferrer">qim-center/qim3d #166</a></td><td>Linux GLIBCXX</td><td>Issue read</td><td>Scope uncertain</td></tr>
+<tr><td><code>CI-0008</code></td><td><a href="https://github.com/pyamg/pyamg/issues/476" rel="noopener noreferrer">pyamg/pyamg #476</a></td><td>Windows DLL loading</td><td>Search summary</td><td>Scope uncertain</td></tr>
+<tr><td><code>CI-0009</code></td><td><a href="https://github.com/casadi/casadi/issues/4402" rel="noopener noreferrer">casadi/casadi #4402</a></td><td>AArch64 native ABI</td><td>Search summary</td><td>Scope uncertain</td></tr>
+<tr><td><code>CI-0010</code></td><td><a href="https://github.com/rjwalters/kicad-tools/issues/6739" rel="noopener noreferrer">rjwalters/kicad-tools #6739</a></td><td>Platform-specific import</td><td>Search summary</td><td>Scope uncertain</td></tr>
+<tr><td><code>CI-0011</code></td><td><a href="https://github.com/michaelmarty/UniDec/issues/143" rel="noopener noreferrer">michaelmarty/UniDec #143</a></td><td>Bundled C++ library</td><td>Search summary</td><td>Scope uncertain</td></tr>
+<tr><td><code>CI-0012</code></td><td><a href="https://github.com/galaxyproject/ansible-galaxy/issues/228" rel="noopener noreferrer">galaxyproject/ansible-galaxy #228</a></td><td>GLIBCXX resolution</td><td>Search summary</td><td>Scope uncertain</td></tr></tbody></table>
+<p><a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/candidates.json">Browse the machine-readable register</a>. The data intentionally contains no fix commit, gold label, EnvGuard prediction or benchmark score.</p>
+</section>
+<section id="reviews">
+<h2>2. Independent evidence review</h2>
+<p>Before a candidate becomes a scored incident, the team must confirm the actual failed CI run and revision, establish a comparable good state, identify the correcting change and obtain a successful post-fix run where possible. Two reviewers should independently assess the facts before seeing any EnvGuard hypothesis.</p>
+<ol>
+<li>Verify the GitHub source issue and a reproducible failing job; reject non-CI cases from the main cohort.</li>
+<li>Check previous comparable environments, dependency metadata and available CI artifacts.</li>
+<li>Deduplicate multiple failed jobs with the same underlying change.</li>
+<li>Freeze a blinded diagnostic bundle excluding fixing commits and resolution text.</li>
+<li>Record two independent evidence-led reviews; adjudicate disagreements and retain unknowns.</li>
+<li>Only then add it to a sealed, versioned held-out evaluation set.</li>
+</ol>
+<p>The <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/CORPUS.md">complete protocol</a> and <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/review-template.csv">blank review form</a> are published for auditability.</p>
+</section>
+<section id="protection">
+<h2>3. Data leakage and selection bias</h2>
+<p>Issue closure is not sufficient evidence of a fix. The same project may contribute many correlated failures; external search terms favor already-documented problems. Independent performance must be calculated on a genuinely held-out set whose labels and solution commits were not available during diagnosis.</p>
+<div class="note warning"><p><strong>Data safety.</strong> Never publish unredacted CI logs, credentials, employer build details, package registry secrets or private repository identifiers. Discovery does not require executing issue attachments or arbitrary code.</p></div>
+</section>
+<section id="participate">
+<h2>4. Next milestone</h2>
+<p>Our goal is at least 50 deduplicated and independently adjudicated incidents spanning multiple Python CI projects and failure classes. Until that stage, the research section reports developer-injected labels and hosted synthetic experiments only.</p>
+<div class="front-actions" style="justify-content:flex-start">
+<a class="primary-action" href="https://github.com/zgcharaf/ENV-Guard/issues" rel="noopener noreferrer">Propose a public case ↗</a>
+<a class="secondary-action" href="../">Read benchmark protocol →</a>
+</div>
+</section>
+<div class="ref-footer"><p>This page is deliberately conservative: an issue link is not a measurement; a closed issue is not a verified repair; and a synthetic test is not an independent production incident.</p><p><a href="../">Back to research →</a></p></div>
+</article></div>
+<footer class="site-footer"><span>EnvGuard CI · Research corpus · Discovery only</span><span><a href="../">Research</a> · <a href="../../">Home</a></span></footer>
+</body>
+</html>

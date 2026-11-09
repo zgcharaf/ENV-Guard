@@ -20,3 +20,7 @@ envguard-baseline.json
 lab/.envguard-runs/
 lab-results/
 .envguard-runs/
+
+# Research incident source data and private adjudication (do not commit)
+research-results/
+research-private/

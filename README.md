@@ -6,6 +6,10 @@
 
 ---
 
+## Public incident discovery corpus
+
+Our research now includes a [public candidate register](https://zgcharaf.github.io/ENV-Guard/research/corpus/) and [review protocol](research/CORPUS.md). Initial public issues are **leads only**; there are no independent incident labels or field accuracy estimates. Run `python research/validate_candidates.py` to audit the candidate registry without network access.
+
 **Diagnose Python CI environment drift, verify wheel bytes, and run constrained recovery experiments.**
 
 This is an experimental, not production-certified release candidate. [v1 operator guide](docs/v1-quickstart.md) · [v1 architecture and trust boundaries](docs/v1-architecture.md) · [security policy](SECURITY.md).

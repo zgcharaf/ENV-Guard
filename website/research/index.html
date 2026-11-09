@@ -25,6 +25,7 @@
 <a href="#reproduce"><span class="toc-number">8.</span> Reproduction</a>
 <a href="#validity"><span class="toc-number">9.</span> Threats to validity</a>
 <a href="#contribute"><span class="toc-number">10.</span> Contribute cases</a>
+<a href="corpus/">Candidate corpus →</a>
 <div class="toc-group">Resources</div>
 <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/BENCHMARK_PROTOCOL.md">Full protocol ↗</a>
 <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/examples/controlled-benchmark.json">Observed sample JSON ↗</a>
@@ -122,6 +123,7 @@
 
 <section id="protocol">
 <h2>6. A held-out benchmark of real incidents</h2>
+<p>We have published an initial <a href="corpus/">12-lead candidate incident register</a>. <strong>None is independently adjudicated</strong>, and the list remains excluded from accuracy estimates.</p>
 <p>We propose an independent collection of at least 50 historical Python CI incidents across multiple maintainers and projects. Each candidate should have a failing revision, a relevant working baseline, redacted logs and an independently verified correction. Two adjudicators should review the causal label without seeing EnvGuard's prediction; disagreements should remain explicit.</p>
 <ol>
 <li><strong>Register the cases.</strong> Fix inclusion criteria and an anonymous incident identifier. Keep an explicit <code>UNKNOWN</code> category when the evidence is insufficient.</li>
