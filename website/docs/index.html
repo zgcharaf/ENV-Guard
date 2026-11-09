@@ -32,6 +32,7 @@
 <a href="#troubleshooting"><span class="toc-number">15.</span> Troubleshooting</a>
 <a href="#development"><span class="toc-number">16.</span> Contributing</a>
 <a href="#references"><span class="toc-number">17.</span> References</a>
+<a href="#native-abi"><span class="toc-number">18.</span> Native wheel ABI</a>
 </aside>
 <article class="doc-article">
 <div class="doc-meta">Technical reference · v1.0.0rc2 · November 2026</div>
@@ -290,6 +291,24 @@ python examples/run_v1_repair_demo.py</code></pre></div>
 </ol>
 <div class="ref-footer"><p><strong>Manual status.</strong> This is a documentation snapshot for v1.0.0rc2. The installed program's <code>--help</code> output and repository source remain the definitive description of exact behavior. The site has no telemetry or server-side components.</p>
 <p><a href="../tutorials/">Next: worked tutorials →</a> · <a href="../research/">Research &amp; benchmarks →</a> · <a href="../">Return to the homepage</a></p></div>
+</section>
+<section id="native-abi">
+<h2>18. Experimental native wheel ABI inspection</h2>
+<p>The latest <code>main</code> source branch contains an opt-in <code>inspect-wheel-abi</code> CLI for static ELF inspection. This experimental command was added <em>after</em> the previously built <code>v1.0.0rc2</code> wheel and should not be claimed to be part of that archived release artifact.</p>
+<p>It reuses the wheel SHA-256 / RECORD integrity checks and reads ELF architecture, <code>DT_NEEDED</code> providers and exact <code>GLIBC</code>, <code>GLIBCXX</code>, and <code>CXXABI</code> version needs with GNU <code>readelf</code>. The wheel is not installed, imported or executed.</p>
+<h3>Capture candidate target library exports</h3>
+<div class="code-example"><div class="code-caption"><span>Run on the intended Linux target</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci capture-native-target \
+  --out target-native.json</code></pre></div>
+<p>The manifest records exact version definitions and hashes from selected local <code>ldconfig</code> provider candidates. It does <strong>not</strong> prove which libraries a specific application process will load.</p>
+<h3>Inspect a wheel and compare with a target</h3>
+<div class="code-example"><div class="code-caption"><span>Static examination</span><button class="copy" type="button">Copy</button></div><pre><code>envguard-ci inspect-wheel-abi \
+  --wheel dist/your_project.whl \
+  --target-manifest target-native.json \
+  --out wheel-abi.json \
+  --fail-on-shortfall</code></pre></div>
+<p>With the optional <code>--fail-on-shortfall</code> flag, an observed required symbol-version label missing from a named target provider causes exit code 1. Without a target manifest, the report says <code>target_not_provided</code>; an unobserved provider or mismatched architecture is explicitly <em>unknown</em>, not compatible.</p>
+<div class="note warning"><p><strong>Boundary.</strong> Parsing an ELF file with <code>readelf</code> is not a security sandbox; use a disposable unprivileged runner for untrusted artifacts. Static symbol observations cannot certify import success, manylinux policy compliance or production safety.</p></div>
+<p>Read the <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/docs/native-abi.md">complete native-ABI manual</a>, follow <a href="../tutorials/#tutorial-native">the worked tutorial</a>, and see the separately sourced <a href="../research/cases/abi-0001/">CasADi static ABI case</a>.</p>
 </section>
 </article></div>
 <footer class="site-footer"><span>EnvGuard CI · Reference manual · v1.0.0rc2</span><span><a href="../">Home</a> · <a href="../tutorials/">Tutorials</a> · <a href="https://github.com/zgcharaf/ENV-Guard">GitHub</a></span></footer>

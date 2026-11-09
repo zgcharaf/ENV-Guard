@@ -2,6 +2,8 @@
 
 A **release candidate for real-world validation**, not a production-certified or security-audited tool.
 
+**Post-rc2 experimental extension on `main`:** Static ELF inspection is now available through `inspect-wheel-abi`, with an optional explicitly captured `capture-native-target` provider manifest. It reads `DT_NEEDED` and versioned C/C++ symbol requirements without loading wheel code. It does not establish actual dynamic linker selection or production compatibility. See [native ABI guide](native-abi.md).
+
 ## Trust boundaries
 
 - **Collector:** a subprocess imports stdlib metadata under the selected interpreter. Python startup hooks can execute application-controlled code. Do not inspect untrusted interpreters with elevated privileges.

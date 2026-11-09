@@ -58,6 +58,15 @@ The command scans ELF files without executing them and reports their requested
 library names and version labels. The fake filename is illustrative; supply
 your own existing wheel.
 
+For large native wheels, scan a single exact ELF object:
+
+```sh
+envguard-ci inspect-wheel-abi --wheel path/to/large.whl \
+  --member casadi/_casadi.so --out selected-elf.json
+```
+
+The exact member path must be present in the wheel. Other native members are **not** examined in this narrow scan.
+
 ### Optional target comparison
 
 ```sh

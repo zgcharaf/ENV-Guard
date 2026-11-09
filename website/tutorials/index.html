@@ -19,6 +19,7 @@
 <a href="#tutorial-wheel"><span class="toc-number">5.</span> Wheel integrity</a>
 <a href="#tutorial-repair"><span class="toc-number">6.</span> Verify a correction</a>
 <a href="#tutorial-reading"><span class="toc-number">7.</span> Reading the evidence</a>
+<a href="#tutorial-native"><span class="toc-number">8.</span> Native wheel ABI</a>
 <div class="toc-group">Reference</div>
 <a href="../docs/">Technical manual →</a>
 <a href="https://github.com/zgcharaf/ENV-Guard/tree/main/examples">Executable examples ↗</a>
@@ -26,7 +27,7 @@
 <article class="doc-article">
 <div class="doc-meta">Laboratory notebook · EnvGuard CI 1.0.0rc2 · Python 3.11+</div>
 <h1>Worked tutorials</h1>
-<p class="doc-lead">Seven reproducible exercises, moving from a local interpreter snapshot to evidence-led CI incident analysis and bounded correction experiments.</p>
+<p class="doc-lead">Eight reproducible exercises, moving from a local interpreter snapshot to evidence-led CI incident analysis and bounded correction experiments.</p>
 <div class="abstract"><span class="abstract-title">How to use this guide</span>
 <p>Each exercise distinguishes its expected observation from what that observation proves. Start with the local tutorial. The GitLab and GitHub exercises use public example configurations that must be adapted to your application's build system and access controls. Use only synthetic or approved code in the repair and container exercises.</p></div>
 
@@ -244,6 +245,27 @@ python -m build --wheel</code></pre></div>
 <h3>Report the result responsibly</h3>
 <p>A good engineering incident summary should state which command failed, which environment was inspected, which baseline was used, which observed facts support the hypothesis, what experiment was run and what remains uncertain.</p>
 <div class="note"><p><strong>Next step.</strong> Want to contribute a new failure class? Create a minimal, synthetic regression fixture and a clearly documented expected diagnosis. See the <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/CONTRIBUTING.md">contributor guide</a>.</p></div>
+</section>
+<section id="tutorial-native" class="numbered-tutorial">
+<h2>8. Examine native ABI requirements without importing a wheel</h2>
+<p><span class="small-label">Objective.</span> Determine which versioned Linux C/C++ runtime symbols a wheel's ELF files require. Optionally compare those requirements with explicitly observed versions defined by target-runtime libraries. This is static evidence, not proof of runtime compatibility.</p>
+<h3>Install EnvGuard from the current source branch</h3>
+<div class="code-example"><div class="code-caption"><span>Use the current checkout (not an earlier release wheel)</span><button type="button" class="copy">Copy</button></div><pre><code>python -m pip install -e .
+envguard-ci inspect-wheel-abi --help</code></pre></div>
+<h3>Capture target evidence on Linux</h3>
+<div class="code-example"><div class="code-caption"><span>Linux host for the intended deployment</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci capture-native-target \
+  --out target-native.json</code></pre></div>
+<p>The manifest records exact exported version labels and hashes from selected <code>ldconfig</code> provider files. It does not guarantee that an arbitrary process will load those same providers. For a foreign ARM64 wheel, capture its target on an ARM64 Linux runtime; an x86-64 manifest is not comparable.</p>
+<h3>Inspect an existing binary wheel</h3>
+<div class="code-example"><div class="code-caption"><span>Replace the wheel filename with your actual artifact</span><button type="button" class="copy">Copy</button></div><pre><code>envguard-ci inspect-wheel-abi \
+  --wheel dist/your_binary_package.whl \
+  --target-manifest target-native.json \
+  --out abi-report.json \
+  --fail-on-shortfall</code></pre></div>
+<p><strong>Expected.</strong> A JSON report with wheel SHA-256, native ELF members, <code>DT_NEEDED</code> libraries, provider-grouped <code>GLIBC</code>, <code>GLIBCXX</code> and <code>CXXABI</code> requirements, and a bounded target comparison. A missing version label yields <code>potential_provider_symbol_gap</code>. Unknown library or platform evidence remains unknown.</p>
+<p>Large native wheels can be scanned one ELF member at a time using <code>--member casadi/_casadi.so</code> (replace with the exact member name). The command does not download, install or import the wheel.</p>
+<div class="note warning"><p><strong>Trust boundary.</strong> GNU <code>readelf</code> parses potentially untrusted binary bytes and is not a sandbox. Execute in a disposable, unprivileged CI runner. The command does not validate all manylinux policies or runtime loader behavior.</p></div>
+<p>Read the <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/docs/native-abi.md">full guide</a> and the <a href="../research/cases/abi-0001/">CasADi public static case study</a>.</p>
 </section>
 <div class="ref-footer"><p><strong>End of laboratory notebook.</strong> Tutorials demonstrate selected v1.0.0rc2 behaviors and intended integration patterns; they are not evidence of general accuracy on unrelated enterprise incidents. Always adapt commands to your own repository structure, shell, runner and security policy.</p><p><a href="../docs/">Reference manual →</a> · <a href="../research/">Research →</a> · <a href="../">Home →</a> · <a href="https://github.com/zgcharaf/ENV-Guard/issues">Report an issue ↗</a></p></div>
 </article></div>

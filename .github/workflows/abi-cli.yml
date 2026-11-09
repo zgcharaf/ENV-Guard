@@ -1,0 +1,48 @@
+name: Test static wheel ABI CLI against real public wheels
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/envguard_ci/wheel_abi.py"
+      - "src/envguard_ci/cli.py"
+      - "research/verify_abi_cli.py"
+      - "tests/test_wheel_abi.py"
+      - "docs/native-abi.md"
+      - ".github/workflows/abi-cli.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  abi-cli:
+    name: Static ABI CLI, target capture, and public wheel regression
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+      - name: Install source distribution under test
+        run: python -m pip install -e .
+      - name: Verify local static and adversarial tests
+        run: python -m unittest discover -s tests -p "test_wheel_abi.py" -v
+      - name: Validate local Linux provider capture and CLI help
+        run: |
+          envguard-ci inspect-wheel-abi --help
+          envguard-ci capture-native-target --out target-native.json
+          python -c "import json; x=json.load(open('target-native.json')); assert x['kind']=='native_symbol_provider_manifest' and 'libc.so.6' in x['providers']"
+      - name: Inspect exact public CasADi ARM64 wheel binaries without execution
+        run: python research/verify_abi_cli.py --out research-results/abi-cli.json
+      - name: Upload bounded research result
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: abi-cli-static-evidence
+          path: research-results/abi-cli.json
+          if-no-files-found: warn
+          retention-days: 30

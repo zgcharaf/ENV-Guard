@@ -1,3 +1,11 @@
+## Unreleased — native wheel ABI evidence (main branch)
+
+- Added experimental `inspect-wheel-abi` and `capture-native-target` commands; not present in previously built v1.0.0rc2 artifacts.
+- Added integrity-gated, bounded static ELF inspection with exact provider version requirements and explicit unknown states.
+- Added a target-provider manifest from Linux `ldconfig` and `readelf` with clear runtime-loader limitations.
+- Added adversarial regression tests and real public ARM64 wheel integration tests.
+- No versioned public release or guaranteed runtime compatibility claimed.
+
 ## 1.0.0rc2 (GitLab pilot compatibility)
 
 - Fix Linux venv interpreter verification: preserve invocation paths of symlinked

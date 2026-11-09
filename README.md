@@ -10,6 +10,18 @@
 
 We documented a public, independently sourced [dependency-resolution incident](https://zgcharaf.github.io/ENV-Guard/research/cases/ci-0002/) with upstream failed/fixed CI evidence and a controlled EnvGuard reproduction. Its original resolution was known to us, so this case is a **public development exemplar permanently excluded from blind holdout accuracy**.
 
+## Experimental native wheel ABI inspection — source branch only
+
+The current `main` branch introduces two **unreleased** CLI commands, `inspect-wheel-abi` and `capture-native-target`. They inspect ELF wheel members and compare exact versioned C/C++ symbol requirements with explicit target evidence, without installing or importing the wheel.
+
+```bash
+python -m pip install -e .
+envguard-ci capture-native-target --out target-native.json
+envguard-ci inspect-wheel-abi --wheel /path/to/package.whl --out abi.json
+```
+
+For large wheels, use `--member package/extension.so` to inspect one exact ELF member. Read the [native ABI guide](docs/native-abi.md). The archived v1.0.0rc2 release wheel does **not** include these newer development commands; no claim of production compatibility is made.
+
 ## External native-ABI case study
 
 The [CasADi ARM64 ABI case](https://zgcharaf.github.io/ENV-Guard/research/cases/abi-0001/) statically compared SHA-256-verified, published Linux wheels. The selected ELF required `GLIBCXX_3.4.32` in 3.8.0 and `GLIBCXX_3.4.21` in 3.8.2. This is a disclosed, known-fix *static development exemplar*—not a tested ARM64 import or proof that the EnvGuard CLI detects this class automatically.
