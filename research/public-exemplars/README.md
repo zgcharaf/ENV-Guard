@@ -11,6 +11,10 @@ already been visible to EnvGuard developers.
 
 The [permanent hosted observation JSON](CI-0002-observed-2026-11-09.json) is derived from the successful workflow job output and stores status, fingerprints of output, EnvGuard hypothesis and the source run URL, without raw logs. It remains a disclosed development case.
 
+| [ABI-0001](ABI-0001-observed-2026-11-09.json) | CasADi ARM64 native ELF runtime version requirements | [Upstream report](https://github.com/casadi/casadi/issues/4402) and [maintainer fix acknowledgement](https://github.com/casadi/casadi/issues/4402#issuecomment-5554745704) | [Hosted static wheel analysis](https://github.com/zgcharaf/ENV-Guard/actions/runs/42667692620): GLIBCXX 3.4.32 → 3.4.21 on selected _casadi.so |
+
+**ABI-0001 is not an independently verified CI job.** This case shows a static symbol-version reduction in a disclosed public native-compatibility issue, not a verified import on target ARM64 hardware. See the [case study](https://zgcharaf.github.io/ENV-Guard/research/cases/abi-0001/).
+
 ## Strict boundaries
 
 - `holdout_eligible=false` is a **permanent** flag for disclosed cases.

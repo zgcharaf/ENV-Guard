@@ -110,8 +110,8 @@
       "title": "AArch64 manylinux wheel references newer C++ symbols",
       "observed_theme": "Wheel ABI compatibility",
       "ci_scope_screen": "needs_scope_review",
-      "source_review": "search_result_only",
-      "evidence_summary": "Issue search summary reports GLIBCXX requirement exceeding deployment host; CI eligibility unresolved.",
+      "source_review": "issue_and_comments_inspected",
+      "evidence_summary": "Original CasADi #4402 report, maintainer discussion and a separate static research audit of published 3.8.0/3.8.2 ARM64 wheels were inspected. Known-fix ABI-0001 development exemplar; CI eligibility unproven and barred from blind accuracy.",
       "adjudication_status": "not_adjudicated"
     },
     {

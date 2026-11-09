@@ -59,3 +59,7 @@ Neither command requires GitHub access.
 ## 7. Permanent exclusion of public development exemplars
 
 Candidate CI-0002 (the public zbase pytest resolver conflict) has been examined with its known fixing PR and replayed by EnvGuard. It must **never** enter a subsequently claimed blinded evaluation. The public source evidence is in [public-exemplars/CI-0002.json](public-exemplars/CI-0002.json), with `holdout_eligible=false`. Keep development examples disjoint from held-out test samples and document any overlap before measuring field performance.
+
+### ABI-0001 — externally sourced static wheel example
+
+The public CasADi issue #4402 was investigated with static ELF version inspection on its published ARM64 wheels. Its source and later fix were already known, so ABI-0001 is another permanently excluded development exemplar. The original report is about native compatibility on user runtimes; no separate failing CI run was independently verified, so the original issue is not automatically admitted into the CI holdout cohort.

@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0",
+  "case_id": "ABI-0001",
+  "study_role": "known_issue_static_development_exemplar",
+  "holdout_eligible": false,
+  "independent_blind_test": false,
+  "is_ci_incident": "not_independently_verified",
+  "observed_at": "2026-11-09",
+  "source_issue": "https://github.com/casadi/casadi/issues/4402",
+  "source_release": "https://pypi.org/project/casadi/3.8.0/",
+  "source_later_release": "https://pypi.org/project/casadi/3.8.2/",
+  "source_comments": [
+    "https://github.com/casadi/casadi/issues/4402#issuecomment-5527073328",
+    "https://github.com/casadi/casadi/issues/4402#issuecomment-5554745704",
+    "https://github.com/casadi/casadi/issues/4402#issuecomment-5555482426"
+  ],
+  "evidence": {
+    "workflow_run": "https://github.com/zgcharaf/ENV-Guard/actions/runs/42667692620",
+    "workflow_job": 129335641105,
+    "archive_artifact": "https://github.com/zgcharaf/ENV-Guard/actions/runs/42667692620/artifacts/13697761637",
+    "experiment_source": "https://github.com/zgcharaf/ENV-Guard/blob/6d7490114c04bfd8c99ae94f36ce192c277dde16/research/replay_native_abi.py",
+    "method": "PyPI JSON hashes for exact cp310-none-manylinux_2_28_aarch64 wheels; pip download without installing; readelf --version-info on casadi/_casadi.so bytes; no import",
+    "status": "abi_requirement_reduced",
+    "results": [
+      {
+        "version": "3.8.0",
+        "wheel": "casadi-3.8.0-cp310-none-manylinux_2_28_aarch64.whl",
+        "sha256": "09ef0eea952cd7db0cfd8c0e580e27a62898186b6220bc7fc6f390a4f868a6ae",
+        "max_required_glibcxx": "GLIBCXX_3.4.32"
+      },
+      {
+        "version": "3.8.2",
+        "wheel": "casadi-3.8.2-cp310-none-manylinux_2_28_aarch64.whl",
+        "sha256": "27d32e7ec82c4ad39ccfe35c743607484a126056169890dfef80df6f18b9799a",
+        "max_required_glibcxx": "GLIBCXX_3.4.21"
+      }
+    ]
+  },
+  "limits": [
+    "Data reflect the single selected _casadi.so ELF object, not every library inside either wheel.",
+    "readelf inspects symbol version references; the binaries were not loaded or run on ARM64.",
+    "No target operating system libstdc++ binary was inspected. This is not runtime import success evidence.",
+    "Case follows known public diagnosis and is ineligible for blinded accuracy.",
+    "Full detailed GitHub Actions artifact retention is temporary; this curated record preserves only summary observations and SHA-256 identifiers.",
+    "Published CasADi issue is primarily an end-user native compatibility report, not independently verified as a CI failure."
+  ]
+}

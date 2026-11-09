@@ -10,6 +10,10 @@
 
 We documented a public, independently sourced [dependency-resolution incident](https://zgcharaf.github.io/ENV-Guard/research/cases/ci-0002/) with upstream failed/fixed CI evidence and a controlled EnvGuard reproduction. Its original resolution was known to us, so this case is a **public development exemplar permanently excluded from blind holdout accuracy**.
 
+## External native-ABI case study
+
+The [CasADi ARM64 ABI case](https://zgcharaf.github.io/ENV-Guard/research/cases/abi-0001/) statically compared SHA-256-verified, published Linux wheels. The selected ELF required `GLIBCXX_3.4.32` in 3.8.0 and `GLIBCXX_3.4.21` in 3.8.2. This is a disclosed, known-fix *static development exemplar*—not a tested ARM64 import or proof that the EnvGuard CLI detects this class automatically.
+
 ## Public incident discovery corpus
 
 Our research now includes a [public candidate register](https://zgcharaf.github.io/ENV-Guard/research/corpus/) and [review protocol](research/CORPUS.md). Initial public issues are **leads only**; there are no independent incident labels or field accuracy estimates. Run `python research/validate_candidates.py` to audit the candidate registry without network access.

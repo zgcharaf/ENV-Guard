@@ -61,6 +61,10 @@ Record case-level result JSON and command versions rather than representing thes
 
 Public development replay [CI-0002](public-exemplars/CI-0002.json) and the [academic case study](https://zgcharaf.github.io/ENV-Guard/research/cases/ci-0002/) contain disclosed fixing evidence and are **excluded** from any future blind holdout metric. The [hosted minimal-pair replay](https://github.com/zgcharaf/ENV-Guard/actions/runs/42664192392) recorded a resolver conflict and successful corrected pair, but did not run the third-party application.
 
+### Second external-development exemplar: native ABI
+
+The [CasADi native ABI case ABI-0001](public-exemplars/ABI-0001-observed-2026-11-09.json) uses externally sourced public wheel artifacts, matched PyPI SHA-256 hashes, and static ELF version inspection. The [hosted run](https://github.com/zgcharaf/ENV-Guard/actions/runs/42667692620) observed \`GLIBCXX_3.4.32\` in 3.8.0 and \`GLIBCXX_3.4.21\` in 3.8.2 for the selected ARM64 extension. This is **not** an independent CI incident or full target-runtime test and must not enter blind attribution metrics. It is a development exemplar for prospective cross-platform ABI reporting.
+
 ## 4. Independent holdout protocol
 
 Target at least 50 independent Python CI incidents from multiple projects/maintainers. For each:

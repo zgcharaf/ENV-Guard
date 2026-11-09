@@ -59,12 +59,35 @@ def validate(data: dict[str, object]) -> dict[str, object]:
     }
 
 
+
+def validate_published_ledger() -> dict[str, object]:
+    """Protect the public-known-fix classification of ABI-0001."""
+    file = Path(__file__).resolve().parent / "public-exemplars" / "ABI-0001-observed-2026-11-09.json"
+    record = json.loads(file.read_text(encoding="utf-8"))
+    if record.get("case_id") != "ABI-0001":
+        raise ValueError("Wrong case ID in permanent native ABI evidence")
+    if record.get("study_role") != "known_issue_static_development_exemplar":
+        raise ValueError("Disclosed ABI study must remain an example")
+    if record.get("holdout_eligible") is not False or record.get("independent_blind_test") is not False:
+        raise ValueError("Disclosed study must be ineligible for blind benchmark")
+    expected = [("3.8.0", "GLIBCXX_3.4.32"), ("3.8.2", "GLIBCXX_3.4.21")]
+    rows = (record.get("evidence") or {}).get("results")
+    if not isinstance(rows, list) or [(r.get("version"), r.get("max_required_glibcxx")) for r in rows] != expected:
+        raise ValueError("Permanent static results differ from hosted evidence")
+    for r in rows:
+        if not SHA.fullmatch(str(r.get("sha256"))):
+            raise ValueError("No immutable wheel identity")
+    return {"case_id": "ABI-0001", "holdout_eligible": False, "permanent_evidence_valid": True}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True)
     args = parser.parse_args()
     data = json.loads(args.input.read_text(encoding="utf-8"))
-    print(json.dumps(validate(data), indent=2))
+    outcome = validate(data)
+    outcome["published_case_ledger"] = validate_published_ledger()
+    print(json.dumps(outcome, indent=2))
     return 0
 
 

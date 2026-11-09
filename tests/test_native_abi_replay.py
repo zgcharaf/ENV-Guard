@@ -6,6 +6,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from research.validate_native_abi import validate_published_ledger
 from research.replay_native_abi import (
     WHEEL_TEMPLATE, VERSIONS, versions_in_readelf, request_release_metadata,
 )
@@ -30,6 +31,11 @@ class NativeAbiStudyTests(unittest.TestCase):
             WHEEL_TEMPLATE.format(version="3.8.0"),
             "casadi-3.8.0-cp310-none-manylinux_2_28_aarch64.whl",
         )
+
+    def test_known_issue_evidence_cannot_be_held_out(self):
+        record = validate_published_ledger()
+        self.assertFalse(record["holdout_eligible"])
+        self.assertTrue(record["permanent_evidence_valid"])
 
     def test_unknown_version_rejected_before_network(self):
         with self.assertRaises(ValueError):

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#faf9f6">
+<meta name="description" content="EnvGuard CI native ABI case study: static ELF symbol requirements in CasADi 3.8.0 versus 3.8.2 ARM64 Linux wheels.">
+<link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../styles.css">
+<script defer src="../../../app.js"></script>
+<title>Case study ABI-0001 — EnvGuard Research</title>
+</head><body><a class="skip-link" href="#main">Skip to case study</a>
+<header class="masthead"><div class="masthead-inner">
+<a class="wordmark" href="../../../"><span class="symbol">E<span class="symbol-dot">·</span>G</span><span class="wordmark-name">EnvGuard <span>CI</span></span></a>
+<nav aria-label="Main navigation">
+<a href="../../../">Home</a><a href="../../../docs/">Documentation</a><a href="../../../tutorials/">Tutorials</a><a href="../../" aria-current="page">Research</a><a href="https://github.com/zgcharaf/ENV-Guard" rel="noopener noreferrer">GitHub ↗</a></nav></div></header>
+<div class="doc-frame" id="main"><aside class="toc" aria-label="Case study contents">
+<h2>ABI-0001</h2>
+<a href="#abstract">Abstract</a><a href="#upstream"><span class="toc-number">1.</span> Upstream report</a><a href="#experimental"><span class="toc-number">2.</span> Experimental design</a>
+<a href="#observations"><span class="toc-number">3.</span> Observations</a><a href="#reproduction"><span class="toc-number">4.</span> Reproduction</a><a href="#limits"><span class="toc-number">5.</span> Scope and limits</a>
+<div class="toc-group">Primary sources</div>
+<a href="https://github.com/casadi/casadi/issues/4402">CasADi issue #4402 ↗</a>
+<a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42667692620">Hosted inspection ↗</a>
+<a href="../../">Research overview →</a>
+</aside><article class="doc-article">
+<div class="doc-meta">Externally sourced native ABI evidence · Known-issue exemplar · November 9, 2026</div>
+<h1>When a wheel requires newer C++ symbols than its target provides</h1>
+<p class="doc-lead">A static comparison of CasADi 3.8.0 and 3.8.2 ARM64 Linux wheels.</p>
+<div class="abstract" id="abstract"><span class="abstract-title">Abstract</span>
+<p>A published CasADi 3.8.0 ARM64 Linux wheel was reported to fail imports on some older Linux systems because its native extension required <code>GLIBCXX_3.4.32</code>. We downloaded the published 3.8.0 and 3.8.2 wheels, verified each against its official PyPI SHA-256 digest, and inspected the ELF version requirements of <code>casadi/_casadi.so</code> without executing the wheel. The highest observed requirement fell from <code>GLIBCXX_3.4.32</code> to <code>GLIBCXX_3.4.21</code>. This demonstrates a specific change in static binary requirements—not a full deployment compatibility proof or an independently blinded EnvGuard diagnosis.</p></div>
+<div class="method-grid">
+<div><span class="step-id">3.8.0</span><h3>3.4.32</h3><p>Highest required GLIBCXX version in the selected ELF extension</p></div>
+<div><span class="step-id">3.8.2</span><h3>3.4.21</h3><p>Highest required GLIBCXX version in the corresponding later wheel</p></div>
+<div><span class="step-id">SAFETY</span><h3>Static only</h3><p>No import, installation, ARM64 execution or source patch</p></div>
+</div>
+<section id="upstream">
+<h2>1. Original upstream failure report</h2>
+<p>In <a href="https://github.com/casadi/casadi/issues/4402">CasADi issue #4402</a>, a user reported that the <code>3.8.0</code> <code>manylinux_2_28_aarch64</code> wheel could not import on Ubuntu 22.04 ARM64 because the system <code>libstdc++</code> did not export <code>GLIBCXX_3.4.32</code>. The report included ELF version-inspection results and described a working alternative environment.</p>
+<p>The maintainer <a href="https://github.com/casadi/casadi/issues/4402#issuecomment-5527073328">acknowledged the defect</a>, and later <a href="https://github.com/casadi/casadi/issues/4402#issuecomment-5554745704">reported a repaired nightly build</a>. The issue reporter subsequently <a href="https://github.com/casadi/casadi/issues/4402#issuecomment-5555482426">confirmed successful execution with that nightly wheel</a>. These are upstream reports, not results of our own runtime verification.</p>
+</section>
+<section id="experimental">
+<h2>2. Static artifact-inspection design</h2>
+<p>Our experiment does not try to reproduce the original ARM64 import crash on an x86-64 CI runner. Instead, it measures the required symbol-version metadata in the exact published wheels. The target is the same <code>cp310-none-manylinux_2_28_aarch64</code> platform tag for both versions.</p>
+<ol>
+<li>Request official PyPI release metadata for <code>3.8.0</code> and <code>3.8.2</code>.</li>
+<li>Download only the exact wheel corresponding to the registered ARM64 platform, without installing its contents.</li>
+<li>Verify the byte size and SHA-256 against PyPI metadata.</li>
+<li>Extract only <code>casadi/_casadi.so</code> with size limits into temporary storage.</li>
+<li>Run <code>readelf --version-info</code> and record required <code>GLIBCXX</code> symbol versions.</li>
+<li>Compare the highest required versions and publish a bounded JSON result.</li>
+</ol>
+<p>The analysis uses a <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/replay_native_abi.py">dedicated research script</a>. It is not an advertised EnvGuard v1.0rc2 CLI command and does not perform dynamic library loading.</p>
+</section>
+<section id="observations">
+<h2>3. Observed results</h2>
+<table><thead><tr><th>Wheel</th><th>Required GLIBCXX maximum</th><th>Evidence</th></tr></thead><tbody>
+<tr><td><code>casadi 3.8.0</code> · cp310 ARM64</td><td><code>3.4.32</code></td><td>PyPI SHA-256 verified</td></tr>
+<tr><td><code>casadi 3.8.2</code> · cp310 ARM64</td><td><code>3.4.21</code></td><td>PyPI SHA-256 verified</td></tr>
+</tbody></table>
+<div class="definition"><span class="definition-label">Observed change</span>
+<p><em>The maximum required GLIBCXX symbol version in the selected native extension declined between the two published wheels. That change is consistent with improved compatibility with older C++ runtimes, but actual imports were not tested here.</em></p></div>
+<p>The hosted workflow <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42667692620">completed successfully</a>. It produced a <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42667692620/artifacts/13697761637">machine-readable artifact</a> retained by GitHub for a limited period. A <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/public-exemplars/ABI-0001-observed-2026-11-09.json">permanent summarized evidence record</a> preserves the observed requirements, SHA-256 digests, run URL and limitations.</p>
+</section>
+<section id="reproduction">
+<h2>4. Reproducing the static inspection</h2>
+<p>The script requires a Linux runner with <code>readelf</code> and network access to PyPI for the exact pinned wheels. It runs no third-party Python package code.</p>
+<div class="code-example"><div class="code-caption"><span>From the ENV-Guard repository</span><button class="copy" type="button">Copy</button></div><pre><code>python research/replay_native_abi.py \
+  --out research-results/native-abi.json
+python research/validate_native_abi.py \
+  --input research-results/native-abi.json</code></pre></div>
+<p>The <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/.github/workflows/native-abi.yml">workflow</a> runs on Ubuntu 24.04 with Python 3.12 and publishes a bounded, versioned evidence artifact. Nothing is installed from the inspected wheels.</p>
+</section>
+<section id="limits">
+<h2>5. Threats to validity and boundaries</h2>
+<ul>
+<li><strong>One ELF member.</strong> We inspected <code>_casadi.so</code>; uninspected native members could still impose newer requirements.</li>
+<li><strong>No target machine.</strong> We did not run a Python import on ARM64 Ubuntu 22.04 or inspect that machine's actual <code>libstdc++</code>.</li>
+<li><strong>Static references.</strong> <code>readelf</code> shows recorded symbol versions; it does not resolve every runtime-loaded dependency or establish successful plugin execution.</li>
+<li><strong>Known public case.</strong> The issue and subsequent fix were available before this experiment. It cannot enter a blinded evaluation.</li>
+<li><strong>Research versus product.</strong> A successful standalone ABI investigation does not mean EnvGuard's CLI now diagnoses every manylinux compatibility issue.</li>
+<li><strong>CI scope.</strong> This source issue is primarily a user-reported compatibility problem. Its eligibility as an independent *CI* incident remains unverified.</li>
+</ul>
+<div class="note warning"><p><strong>Study classification.</strong> ABI-0001 is a <code>known_issue_static_development_exemplar</code> with <code>holdout_eligible=false</code>. No external CI-incident accuracy or general package compatibility rate is inferred.</p></div>
+<div class="ref-footer"><p><a href="../../">Research overview →</a> · <a href="../../corpus/">Candidate corpus →</a> · <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/public-exemplars/ABI-0001-observed-2026-11-09.json">Permanent evidence ↗</a></p></div>
+</section>
+</article></div><footer class="site-footer"><span>EnvGuard CI · Native ABI case ABI-0001 · Static evidence only</span><span><a href="../../">Research</a> · <a href="../../../">Home</a></span></footer>
+</body></html>
