@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1016">
+  <meta name="description" content="EnvGuard CI helps engineers investigate Python CI failures with interpreter provenance, environment comparisons, and evidence-linked incident reports. Local-first and open source.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="EnvGuard CI — Know why Python failed.">
+  <meta property="og:description" content="Evidence-led Python CI failure investigation. Less guessing, more proof. Open source and local-first.">
+  <meta property="og:url" content="https://zgcharaf.github.io/ENV-Guard/">
+  <link rel="canonical" href="https://zgcharaf.github.io/ENV-Guard/">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+  <title>EnvGuard CI — Know why Python failed.</title>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="announcement">
+    <span class="status-pulse" aria-hidden="true"></span>
+    <span>Public release candidate <strong>v1.0.0rc2</strong></span>
+    <span class="announce-sep" aria-hidden="true">·</span>
+    <span>MIT licensed · Python 3.11+</span>
+    <a href="https://github.com/zgcharaf/ENV-Guard" target="_blank" rel="noopener noreferrer">Explore the source <span aria-hidden="true">↗</span></a>
+  </div>
+  <header class="site-header">
+    <nav class="nav wrap" aria-label="Main navigation">
+      <a class="brand" href="#top" aria-label="EnvGuard CI home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M16 2 28 7v9c0 8-5.6 12.6-12 14C9.6 28.6 4 24 4 16V7L16 2Z" stroke="currentColor" stroke-width="2"/><path d="m10 16 4 4 8-9" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span>envguard<span class="brand-accent">/</span><span class="brand-secondary">ci</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="#problem">The problem</a>
+        <a href="#how">How it works</a>
+        <a href="#quickstart">Quick start</a>
+        <a href="#trust">Trust & limits</a>
+      </div>
+      <a class="nav-github" href="https://github.com/zgcharaf/ENV-Guard" target="_blank" rel="noopener noreferrer">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.55.1.76-.24.76-.53v-2.07c-3.09.67-3.75-1.32-3.75-1.32-.51-1.28-1.25-1.62-1.25-1.62-1.02-.69.08-.68.08-.68 1.13.08 1.72 1.16 1.72 1.16 1 .1.9 2.27 3.23 1.64.1-.73.39-1.23.71-1.52-2.47-.28-5.06-1.24-5.06-5.5 0-1.22.44-2.22 1.16-3-.12-.28-.5-1.42.11-2.96 0 0 .94-.3 3.06 1.14a10.7 10.7 0 0 1 5.57 0c2.12-1.44 3.06-1.14 3.06-1.14.61 1.54.23 2.68.11 2.96.72.78 1.16 1.78 1.16 3 0 4.27-2.6 5.21-5.08 5.49.4.34.75 1.01.75 2.04V22c0 .29.2.64.77.53A11.1 11.1 0 0 0 12 .9Z"/></svg>
+        GitHub <span aria-hidden="true">↗</span>
+      </a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section id="top" class="hero wrap">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="mini-bar"></span> THE PYTHON CI DIAGNOSTIC LAYER</div>
+        <h1>Your build failed.<br><span>Know <em>why.</em></span></h1>
+        <p class="lead">“Works on my machine” isn’t a diagnosis. EnvGuard CI connects Python interpreter identity, installed packages and runtime differences to explain <strong>supported CI failures with evidence</strong>—not guesswork.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#quickstart">Get started <span aria-hidden="true">↗</span></a>
+          <a class="button button-outline" href="https://github.com/zgcharaf/ENV-Guard" target="_blank" rel="noopener noreferrer">View source <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="hero-proof">
+          <span><span class="tiny-check">✓</span> Open source · MIT</span>
+          <span><span class="tiny-check">✓</span> Local-first</span>
+          <span><span class="tiny-check">✓</span> Works alongside pip / uv / Poetry</span>
+        </div>
+      </div>
+      <div class="terminal-shell" aria-label="Interactive demonstration of an EnvGuard incident report">
+        <div class="terminal-top">
+          <div class="terminal-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <span>envguard · incident investigation</span>
+          <span class="terminal-badge">DEMO</span>
+        </div>
+        <div class="demo-tabs" role="tablist" aria-label="Diagnostic scenarios">
+          <button class="demo-tab active" type="button" role="tab" id="tab-interpreter" aria-selected="true" aria-controls="demo-pane" data-case="interpreter">Wrong Python</button>
+          <button class="demo-tab" type="button" role="tab" id="tab-missing" aria-selected="false" aria-controls="demo-pane" data-case="missing" tabindex="-1">Unknown import</button>
+          <button class="demo-tab" type="button" role="tab" id="tab-native" aria-selected="false" aria-controls="demo-pane" data-case="native" tabindex="-1">Native error</button>
+        </div>
+        <div class="terminal-body" id="demo-pane" role="tabpanel" aria-labelledby="tab-interpreter">
+          <div class="t-line t-muted"><span class="prompt">$</span> envguard-ci investigate --project . -- python -m app</div>
+          <div class="t-divider"></div>
+          <div class="t-row"><span class="t-label">EXECUTION</span><span class="pill pill-fail" id="demo-status">FAILED · EXIT 1</span></div>
+          <div class="t-error" id="demo-error">ModuleNotFoundError: No module named 'riskbatch'</div>
+          <div class="t-divider"></div>
+          <div class="t-label t-section">ROOT-CAUSE HYPOTHESIS</div>
+          <div class="t-cause" id="demo-cause">WRONG_PYTHON_INTERPRETER</div>
+          <div class="t-evidence" id="demo-evidence">
+            <div><span class="t-check">✓</span> Expected interpreter contains <code>riskbatch</code></div>
+            <div><span class="t-check">✓</span> Executed interpreter differs</div>
+            <div><span class="t-check">✓</span> Executing runtime lacks the package</div>
+          </div>
+          <div class="t-divider"></div>
+          <div class="t-bottom"><span class="t-confidence" id="demo-confidence">HIGH · SUPPORTED HYPOTHESIS</span><span class="t-demo-label" id="demo-label">Controlled GitLab case</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="stat-strip">
+      <div class="wrap strip-inner">
+        <span class="strip-head">THE HARD PART ISN'T INSTALLATION.</span>
+        <div class="strip-divider" aria-hidden="true"></div>
+        <p>It's proving <strong>which environment ran</strong>, <strong>what changed</strong>, and <strong>what the evidence actually supports.</strong></p>
+      </div>
+    </section>
+
+    <section class="section wrap" id="problem">
+      <div class="section-intro">
+        <span class="kicker">01 / THE PROBLEM</span>
+        <h2>Same error.<br><span>Different root causes.</span></h2>
+        <p><code>ModuleNotFoundError</code> could mean the dependency was never installed, another virtualenv ran the command, or Python startup flags hid site-packages. A package list alone can’t tell you which.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <div class="feature-icon"><span>01</span> /</div>
+          <h3>Execution provenance</h3>
+          <p>Record the directly invoked Python executable and compare it to the explicitly intended environment.</p>
+          <div class="card-tag">Interpreter identity</div>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon"><span>02</span> /</div>
+          <h3>Environment comparison</h3>
+          <p>Diff compatible snapshots of Python, installed distributions, selected metadata and platform details.</p>
+          <div class="card-tag">Last-green context</div>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon"><span>03</span> /</div>
+          <h3>Evidence-linked dossiers</h3>
+          <p>Get readable findings tied to specific JSON evidence, confidence levels and safe next checks.</p>
+          <div class="card-tag">Auditable hypotheses</div>
+        </article>
+        <article class="feature-card">
+          <div class="feature-icon"><span>04</span> /</div>
+          <h3>Constrained verification</h3>
+          <p>Explicitly test whether an alternate interpreter executes the same command successfully, recording both outcomes.</p>
+          <div class="card-tag">Observed candidate result</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section how-section" id="how">
+      <div class="wrap">
+        <div class="section-intro narrow">
+          <span class="kicker">02 / HOW IT WORKS</span>
+          <h2>From red pipeline<br><span>to a reasoned answer.</span></h2>
+        </div>
+        <div class="steps">
+          <div class="step"><div class="step-number">01</div><div><h3>Wrap your existing command</h3><p>Keep pip, uv, Poetry and your CI setup. EnvGuard executes the command you specify and preserves its exit status.</p></div></div>
+          <div class="step"><div class="step-number">02</div><div><h3>Collect runtime evidence</h3><p>Capture runtime metadata and correlate the observed failure with a known-good snapshot when available.</p></div></div>
+          <div class="step"><div class="step-number">03</div><div><h3>Investigate with clarity</h3><p>Read the incident dossier: what happened, what the evidence supports, what remains unknown and what to check next.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section wrap quickstart" id="quickstart">
+      <div class="section-intro narrow">
+        <span class="kicker">03 / QUICK START</span>
+        <h2>Useful in minutes.<br><span>No platform migration.</span></h2>
+        <p>Install from source for this release candidate. The package has not been claimed as a public PyPI release.</p>
+      </div>
+      <div class="install-panel">
+        <div class="install-header">
+          <div class="install-tabs" role="tablist" aria-label="Operating system">
+            <button type="button" role="tab" class="install-tab active" data-platform="unix" aria-selected="true" id="tab-unix" aria-controls="install-code">Linux / macOS</button>
+            <button type="button" role="tab" class="install-tab" data-platform="windows" aria-selected="false" tabindex="-1" id="tab-windows" aria-controls="install-code">PowerShell</button>
+          </div>
+          <button class="copy-btn" id="copy-install" type="button" aria-label="Copy installation commands"><span id="copy-label">Copy</span> <span aria-hidden="true">↗</span></button>
+        </div>
+        <pre id="install-code" role="tabpanel" aria-labelledby="tab-unix"><code id="install-text">git clone https://github.com/zgcharaf/ENV-Guard.git
+cd ENV-Guard
+python -m pip install -e .
+envguard-ci --version</code></pre>
+        <div class="install-footer"><span class="online" aria-hidden="true"></span> Python 3.11+ <span class="footer-sep">/</span> No external EnvGuard service <span class="footer-sep">/</span> MIT</div>
+      </div>
+      <div class="quickstart-bottom">
+        <div>
+          <h3>Investigate a failed command</h3>
+          <p>Retain both machine-readable and human-readable reports.</p>
+        </div>
+        <div class="mini-command">
+          <code>envguard-ci investigate --project . --report-out report.json -- python -m pytest</code>
+          <button type="button" id="copy-investigate" aria-label="Copy investigation command">Copy ↗</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section trust-section" id="trust">
+      <div class="wrap trust-layout">
+        <div class="section-intro">
+          <span class="kicker">04 / TRUST BY DESIGN</span>
+          <h2>Evidence first.<br><span>Certainty earned.</span></h2>
+          <p>Engineering tools should be clear about what they know—and what they don't.</p>
+          <a class="text-link" href="https://github.com/zgcharaf/ENV-Guard/blob/main/SECURITY.md" target="_blank" rel="noopener noreferrer">Read the security policy <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="trust-checks">
+          <div><span class="trust-dot">✓</span><div><h3>Local-first</h3><p>No EnvGuard cloud backend or automatic telemetry required for local diagnostics.</p></div></div>
+          <div><span class="trust-dot">✓</span><div><h3>No silent repair</h3><p>Candidate interpreter experiments require explicit permission; source and dependency files aren't auto-modified.</p></div></div>
+          <div><span class="trust-dot">✓</span><div><h3>Explicit uncertainty</h3><p>A missing import is not automatically attributed to a particular package or environmental change.</p></div></div>
+          <div><span class="trust-dot trust-alert">!</span><div><h3>Real limitations</h3><p>Not a sandbox. Doesn't trace arbitrary child Python processes. CI artifacts can include sensitive package metadata and require restricted access. Independent accuracy benchmarking is pending.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="wrap cta-content">
+        <div><span class="kicker">BUILT FOR PEOPLE WHO SHIP PYTHON</span><h2>Make failed builds<br><span>less mysterious.</span></h2><p>Try the controlled failure lab. Read the evidence. Open an issue if something is missing. Help make CI diagnostics more useful.</p></div>
+        <div class="cta-actions"><a class="button button-dark" href="https://github.com/zgcharaf/ENV-Guard" target="_blank" rel="noopener noreferrer">Explore EnvGuard on GitHub <span aria-hidden="true">↗</span></a><a class="cta-secondary" href="https://github.com/zgcharaf/ENV-Guard/issues" target="_blank" rel="noopener noreferrer">Report an issue →</a></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-row">
+      <a class="brand footer-brand" href="#top">envguard<span class="brand-accent">/</span><span class="brand-secondary">ci</span></a>
+      <span>Local-first Python CI evidence · Experimental release candidate</span>
+      <div><a href="https://github.com/zgcharaf/ENV-Guard" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://github.com/zgcharaf/ENV-Guard/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">MIT License</a><a href="https://github.com/zgcharaf/ENV-Guard/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">Contribute</a></div>
+    </div>
+  </footer>
+</body>
+</html>
