@@ -59,6 +59,8 @@ The [GitHub Actions benchmark run](https://github.com/zgcharaf/ENV-Guard/actions
 
 Record case-level result JSON and command versions rather than representing these findings as competitive superiority. Artifact retention is limited; refer to the pinned workflow run and copy sanitized evidence into a properly reviewed permanent data release before publication of a formal report.
 
+Public development replay [CI-0002](public-exemplars/CI-0002.json) and the [academic case study](https://zgcharaf.github.io/ENV-Guard/research/cases/ci-0002/) contain disclosed fixing evidence and are **excluded** from any future blind holdout metric. The [hosted minimal-pair replay](https://github.com/zgcharaf/ENV-Guard/actions/runs/42664192392) recorded a resolver conflict and successful corrected pair, but did not run the third-party application.
+
 ## 4. Independent holdout protocol
 
 Target at least 50 independent Python CI incidents from multiple projects/maintainers. For each:

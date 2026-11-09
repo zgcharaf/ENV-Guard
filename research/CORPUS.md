@@ -55,3 +55,7 @@ Neither command requires GitHub access.
 **Current status:** 12 discovery leads; 6 plausibly CI related; 0 independently adjudicated; 0 publicly benchmarked field incidents.
 
 **Minimum next target:** 50 independently reviewed and deduplicated real CI incidents across multiple projects. The full methodology is in [BENCHMARK_PROTOCOL.md](BENCHMARK_PROTOCOL.md).
+
+## 7. Permanent exclusion of public development exemplars
+
+Candidate CI-0002 (the public zbase pytest resolver conflict) has been examined with its known fixing PR and replayed by EnvGuard. It must **never** enter a subsequently claimed blinded evaluation. The public source evidence is in [public-exemplars/CI-0002.json](public-exemplars/CI-0002.json), with `holdout_eligible=false`. Keep development examples disjoint from held-out test samples and document any overlap before measuring field performance.

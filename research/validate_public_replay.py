@@ -63,11 +63,25 @@ def validate(record: object) -> dict[str, object]:
     }
 
 
+def validate_disclosed_case() -> dict[str, object]:
+    ledger_file = Path(__file__).resolve().parent / "public-exemplars" / "CI-0002.json"
+    case = json.loads(ledger_file.read_text(encoding="utf-8"))
+    if case.get("id") != "CI-0002" or case.get("source_repo") != "cvsz/zbase":
+        raise ValueError("Public case source or ID changed")
+    if case.get("study_role") != "public_development_exemplar":
+        raise ValueError("Disclosed case cannot be used as blind ground truth")
+    if case.get("holdout_eligible") is not False or case.get("independently_blind_adjudicated") is not False:
+        raise ValueError("Disclosed case must be excluded from holdout metrics")
+    return {"case": case["id"], "holdout_eligible": False}
+
+
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--input", type=Path, required=True)
     args = p.parse_args()
-    print(json.dumps(validate(json.loads(args.input.read_text(encoding="utf-8"))), indent=2))
+    result = validate(json.loads(args.input.read_text(encoding="utf-8")))
+    result["public_case_exclusion"] = validate_disclosed_case()
+    print(json.dumps(result, indent=2))
     return 0
 
 

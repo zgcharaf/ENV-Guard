@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#faf9f6">
+<meta name="description" content="EnvGuard CI case study CI-0002: a real public pip dependency-resolution failure, independently sourced fixing commit, and controlled hosted replay.">
+<link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../styles.css">
+<script defer src="../../../app.js"></script>
+<title>Case study CI-0002 — EnvGuard Research</title>
+</head><body>
+<a class="skip-link" href="#main">Skip to article</a>
+<header class="masthead"><div class="masthead-inner">
+<a class="wordmark" href="../../../"><span class="symbol">E<span class="symbol-dot">·</span>G</span><span class="wordmark-name">EnvGuard <span>CI</span></span></a>
+<nav aria-label="Main navigation"><a href="../../../">Home</a><a href="../../../docs/">Documentation</a><a href="../../../tutorials/">Tutorials</a><a href="../../" aria-current="page">Research</a><a href="https://github.com/zgcharaf/ENV-Guard" rel="noopener noreferrer">GitHub ↗</a></nav>
+</div></header>
+<div class="doc-frame" id="main">
+<aside class="toc" aria-label="Case study sections">
+<h2>Case CI-0002</h2>
+<a href="#overview">Abstract</a>
+<a href="#external"><span class="toc-number">1.</span> External CI evidence</a>
+<a href="#correction"><span class="toc-number">2.</span> Verified source change</a>
+<a href="#replay"><span class="toc-number">3.</span> EnvGuard replay</a>
+<a href="#method"><span class="toc-number">4.</span> Reproducible method</a>
+<a href="#limits"><span class="toc-number">5.</span> Validity &amp; exclusion</a>
+<div class="toc-group">Evidence</div>
+<a href="https://github.com/cvsz/zbase/issues/19">Original issue ↗</a>
+<a href="https://github.com/cvsz/zbase/pull/24">Merged fix ↗</a>
+<a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42664192392">EnvGuard hosted replay ↗</a>
+<a href="../../corpus/">Candidate corpus →</a>
+</aside>
+<article class="doc-article">
+<div class="doc-meta">Public case study · CI-0002 · November 9, 2026</div>
+<h1>A dependency conflict that stopped Python CI</h1>
+<p class="doc-lead">An independently sourced failed build, its merged dependency correction, and a limited EnvGuard replay using public package metadata.</p>
+<div class="abstract" id="overview">
+<span class="abstract-title">Abstract</span>
+<p>Two CI jobs in the public <em>zbase</em> repository failed because a test dependency pinned <code>pytest==9.0.3</code> while <code>pytest-asyncio==1.2.0</code> required pytest below 9. The upstream project merged a one-line update to <code>pytest-asyncio==1.4.0</code> and its following CI run passed. Independently, EnvGuard CI reproduced the minimal conflicting pair using pip's all-wheel, dry-run resolver, recognized <code>DEPENDENCY_RESOLUTION_CONFLICT</code>, and recorded successful resolution with the corrected pair. This is a transparent <strong>public development exemplar</strong>, not a blind field-accuracy trial.</p>
+</div>
+<div class="method-grid">
+<div><span class="step-id">UPSTREAM</span><h3>2 failed jobs</h3><p>Original lint/unit and integration/security CI jobs.</p></div>
+<div><span class="step-id">UPSTREAM</span><h3>5 passing jobs</h3><p>Success on the subsequent fixed source revision.</p></div>
+<div><span class="step-id">ENVGUARD</span><h3>1 → 0</h3><p>Minimal conflicting-pair exit code → corrected-pair exit code.</p></div>
+</div>
+
+<section id="external">
+<h2>1. Observations from the original CI failure</h2>
+<p>The source issue is <a href="https://github.com/cvsz/zbase/issues/19">cvsz/zbase #19</a>. The reported revision used the following pinned test dependencies:</p>
+<div class="code-example"><div class="code-caption"><span>requirements-dev.txt, original revision (relevant lines)</span><button class="copy" type="button">Copy</button></div><pre><code>pytest==9.0.3
+pytest-asyncio==1.2.0</code></pre></div>
+<p>The <a href="https://github.com/cvsz/zbase/actions/runs/42434561391">original GitHub Actions workflow</a> contained failures in <code>lint and unit tests</code> (job 128590526773) and <code>integration, S3 compatibility and security</code> (job 128590526601). The decoded pip logs contained an explicit dependency-resolution conflict:</p>
+<div class="definition">
+<span class="definition-label">Log evidence — condensed, not a full reproduced log</span>
+<p><code>pytest-asyncio 1.2.0</code> required <code>pytest&lt;9, &gt;=8.2</code>, while the project pinned <code>pytest==9.0.3</code>. Pip reported <code>ResolutionImpossible</code> and exited nonzero.</p>
+</div>
+<p>These are observations about the original upstream CI, not an EnvGuard diagnosis of that historical job. The failed revision's <a href="https://github.com/cvsz/zbase/blob/3c33b3550ad79748d67bc0a34f2f5a578b8e11fa/requirements-dev.txt">dependency file</a> supports the stated pins.</p>
+</section>
+
+<section id="correction">
+<h2>2. Correction verified in the upstream project</h2>
+<p><a href="https://github.com/cvsz/zbase/pull/24">PR #24</a> was merged. Its visible diff changes one test dependency pin:</p>
+<div class="code-example"><div class="code-caption"><span>One-line source correction</span><button class="copy" type="button">Copy</button></div><pre><code>-pytest-asyncio==1.2.0
++pytest-asyncio==1.4.0</code></pre></div>
+<p>The subsequent <a href="https://github.com/cvsz/zbase/actions/runs/42434951881">CI run</a> completed successfully across its five reported jobs. The lint/unit log recorded <strong>90 passed</strong>; the integration log recorded <strong>199 passed, 1 warning</strong>. The fixed revision's <a href="https://github.com/cvsz/zbase/blob/977b349f22b03c3850b24e0e10103fc92d37b4f1/requirements-dev.txt">dependency file</a> contains the corrected pin.</p>
+<div class="note"><p><strong>Evidence strength.</strong> The original failure, merged change and following green CI are public primary records. This is stronger than an issue merely being closed. It still does not demonstrate that EnvGuard autonomously discovered the repair.</p></div>
+</section>
+
+<section id="replay">
+<h2>3. EnvGuard's hosted minimal-pair replay</h2>
+<p>The <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42664192392">independent EnvGuard GitHub Actions workflow</a> ran on Ubuntu 24.04 with Python 3.12. It requested public PyPI wheel metadata through pip's isolated, dry-run resolver. It did not clone, install or execute the upstream application.</p>
+<table><thead><tr><th>Tested public dependency pair</th><th>pip status</th><th>EnvGuard observation</th></tr></thead><tbody>
+<tr><td><code>pytest==9.0.3</code> + <code>pytest-asyncio==1.2.0</code></td><td>Exit 1, <code>ResolutionImpossible</code></td><td><code>DEPENDENCY_RESOLUTION_CONFLICT</code></td></tr>
+<tr><td><code>pytest==9.0.3</code> + <code>pytest-asyncio==1.4.0</code></td><td>Exit 0</td><td>No specific failure hypothesis</td></tr>
+</tbody></table>
+<p>The runner's schema and safety tests passed, the experiment completed with status <code>minimal_pair_reproduced</code>, and the output validator confirmed that the case remains excluded from held-out accuracy.</p>
+<p>Open the <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42664192392/artifacts/13694139932">machine-readable replay summary</a> (short-lived GitHub Actions artifact) or inspect the <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/public-exemplars/CI-0002.json">permanent curated source ledger</a>.</p>
+</section>
+
+<section id="method">
+<h2>4. Reproducing the experiment</h2>
+<p>From a local checkout, with a supported Python runtime and access to the public PyPI index:</p>
+<div class="code-example"><div class="code-caption"><span>Run the publicly defined minimal-pair experiment</span><button class="copy" type="button">Copy</button></div><pre><code>python -m pip install -e .
+python research/replay_public_conflict.py \
+  --out research-results/public-replay
+python research/validate_public_replay.py \
+  --input research-results/public-replay/replay-summary.json</code></pre></div>
+<p>The script wraps pip with EnvGuard, preserves the command's actual exit code, writes detailed local reports and publishes only a bounded JSON summary without raw stdout/stderr. The resolver is configured with <code>--dry-run</code>, <code>--ignore-installed</code>, <code>--only-binary=:all:</code> and the public index. Network access to PyPI is necessary; no application dependency is installed by the resolver test.</p>
+</section>
+
+<section id="limits">
+<h2>5. Limits, causal interpretation and holdout exclusion</h2>
+<ol>
+<li><strong>Known solution.</strong> The authors inspected PR #24 before constructing this test. The case is consequently not blinded and <em>cannot be used as evidence for independent attribution accuracy</em>.</li>
+<li><strong>Minimal-pair reduction.</strong> The replay resolves only the two conflicting package pins, not the full upstream dependency set or all CI jobs.</li>
+<li><strong>Different execution context.</strong> The upstream CI and EnvGuard replay may differ in operating system, pip version, index metadata and other dependencies.</li>
+<li><strong>No code execution from zbase.</strong> We deliberately did not execute the third-party application's tests, examine any private runner data or access non-public project resources.</li>
+<li><strong>Not a competitor leaderboard.</strong> Pip already reports the conflicting constraints; EnvGuard adds a separate diagnostic summary. This experiment is not proof of superiority to pip or uv.</li>
+</ol>
+<div class="note warning"><p><strong>Research classification.</strong> Case CI-0002 has the status <code>public_development_exemplar</code>, with <code>holdout_eligible=false</code> in the curated source ledger. It must be excluded when an independent evaluation set is frozen.</p></div>
+<div class="ref-footer"><p><a href="../../">Research &amp; benchmarks →</a> · <a href="../../corpus/">Candidate corpus →</a> · <a href="https://github.com/zgcharaf/ENV-Guard/issues/1">Independent-corpus milestone ↗</a></p></div>
+</section>
+</article></div>
+<footer class="site-footer"><span>EnvGuard CI · Public case CI-0002 · Known-fix development example</span><span><a href="../../">Research</a> · <a href="../../../">Home</a></span></footer>
+</body></html>

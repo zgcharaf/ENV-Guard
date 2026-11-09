@@ -10,7 +10,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from research.replay_public_conflict import command, observed_outcome  # noqa: E402
-from research.validate_public_replay import validate  # noqa: E402
+from research.validate_public_replay import validate, validate_disclosed_case  # noqa: E402
 
 
 def fixture():
@@ -70,6 +70,9 @@ class PublicReplayTests(unittest.TestCase):
         data["may_be_counted_in_holdout_accuracy"] = True
         with self.assertRaises(ValueError):
             validate(data)
+
+    def test_public_case_cannot_be_held_out(self):
+        self.assertFalse(validate_disclosed_case()["holdout_eligible"])
 
     def test_broken_pair_must_fail(self):
         data = copy.deepcopy(fixture())

@@ -6,6 +6,10 @@
 
 ---
 
+## External CI case study
+
+We documented a public, independently sourced [dependency-resolution incident](https://zgcharaf.github.io/ENV-Guard/research/cases/ci-0002/) with upstream failed/fixed CI evidence and a controlled EnvGuard reproduction. Its original resolution was known to us, so this case is a **public development exemplar permanently excluded from blind holdout accuracy**.
+
 ## Public incident discovery corpus
 
 Our research now includes a [public candidate register](https://zgcharaf.github.io/ENV-Guard/research/corpus/) and [review protocol](research/CORPUS.md). Initial public issues are **leads only**; there are no independent incident labels or field accuracy estimates. Run `python research/validate_candidates.py` to audit the candidate registry without network access.

@@ -19,6 +19,7 @@
 <a href="#controlled"><span class="toc-number">2.</span> Controlled experiment</a>
 <a href="#cases"><span class="toc-number">3.</span> Per-case results</a>
 <a href="#hosted"><span class="toc-number">4.</span> Hosted CI incidents</a>
+<a href="cases/ci-0002/">Public case CI-0002 →</a>
 <a href="#comparators"><span class="toc-number">5.</span> Comparator design</a>
 <a href="#protocol"><span class="toc-number">6.</span> Independent benchmark</a>
 <a href="#metrics"><span class="toc-number">7.</span> Evaluation metrics</a>
@@ -99,6 +100,8 @@
 <p>The <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42619255881">initial GitHub Actions run</a> executed a synthetic wrong-interpreter scenario and logged a <code>No module named riskbatch</code> error. EnvGuard reported <code>WRONG_PYTHON_INTERPRETER</code>. That workflow was <strong>not</strong> an unqualified success: a brittle assertion in the demo's Markdown validation failed, and an outdated release smoke-test version check failed separately. We keep that run visible because failed tests are part of the empirical record.</p>
 <h3>Case H2 — Successful GitHub quality gates</h3>
 <p>The subsequent <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42652589626">hosted CI run</a> completed successfully across the supported test matrix and release/lab jobs. This demonstrates integration and regression behavior on the tested runner configurations, not independent accuracy on novel failures.</p>
+<h3>Case H4 — Public dependency conflict with a verified upstream fix</h3>
+<p>We reviewed the <a href="https://github.com/cvsz/zbase/issues/19">original CI failure</a>, <a href="https://github.com/cvsz/zbase/pull/24">merged fix</a> and <a href="https://github.com/cvsz/zbase/actions/runs/42434951881">green CI run</a> from an unrelated public Python project. A separately hosted EnvGuard replay used pip's dry-run resolver on the conflicting and corrected package pins. EnvGuard classified the failed pair as <code>DEPENDENCY_RESOLUTION_CONFLICT</code>, while the corrected pair resolved. Read the <a href="cases/ci-0002/">full case study (CI-0002)</a>. Because the fix was known beforehand, this is a public development example, <strong>not blinded field accuracy</strong>.</p>
 <h3>Case H3 — GitLab wrong-interpreter pilot</h3>
 <p>The separate <a href="https://gitlab.com/envguardci-group/envguard-gitlab-pilot">GitLab pilot repository</a> has previously executed an intentionally failing job with two virtual environments: the package was installed in an intended environment, while the failing command used another interpreter. Its evidence report classified the wrong-interpreter failure, and GitLab retained the diagnostic artifacts. The pilot is a real hosted run of a <em>synthetic</em> incident, not an independently discovered production outage.</p>
 <div class="note"><p><strong>No production claims.</strong> Public real-world incident candidates from outside the project still need independent root-cause adjudication, permission to reuse evidence, and held-out evaluation. They are not silently counted as solved.</p></div>
