@@ -40,7 +40,7 @@ def main() -> int:
     if predicted != "WRONG_PYTHON_INTERPRETER" or not incident.is_file():
         raise AssertionError(f"Demo did not identify the wrong Python: {predicted}")
     md = incident.read_text(encoding="utf-8")
-    if "Evidence ledger" not in md or "interpreter\\_match" not in md:
+    if "Evidence ledger" not in md or report.get("execution_provenance", {}).get("interpreter_match") is not False:
         raise AssertionError("The evidence-linked dossier is incomplete")
     print(f"DEMO PASS: {predicted}; failing exit={executed.returncode}; dossier={incident}")
     return 0

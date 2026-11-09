@@ -64,7 +64,7 @@ def smoke(dist: Path, version: str, offline: bool) -> dict[str, object]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dist", type=Path, default=Path("dist"))
-    parser.add_argument("--version", default="1.0.0rc1")
+    parser.add_argument("--version", default="1.0.0rc2")
     parser.add_argument("--offline", action="store_true")
     args = parser.parse_args()
     print(json.dumps(smoke(args.dist, args.version, args.offline), indent=2))
