@@ -264,8 +264,8 @@ def inspect_wheel_abi(wheel: str, *, approved_sha256: str | None = None,
     observations: list[dict[str, Any]] = []
     with tempfile.TemporaryDirectory(prefix="envguard-static-elf-") as temp:
         with zipfile.ZipFile(path) as archive:
-            for index, member in enumerate(members):
-                observations.append(_analyze_member(archive, member, Path(temp), index))
+            for index, zip_member in enumerate(members):
+                observations.append(_analyze_member(archive, zip_member, Path(temp), index))
     target = _read_target_manifest(target_manifest) if target_manifest else None
     comparison = _compare_abi(observations, target)
     return {
