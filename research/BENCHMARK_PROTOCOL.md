@@ -46,7 +46,16 @@ The script invokes \`<case-venv-python> -m pip check\` and \`uv pip check --pyth
 
 For \`uv pip check\`, verify the installed uv version supports \`--python\`; the published version and help output should be kept with the evidence. If a command fails because of unsupported options, classify it as *execution/compatibility failure*, not as a finding.
 
-**Important:** No cross-tool comparator scores have been independently reported on the website. The repository must retain the resulting JSON with the commit and full runner environment before measured claims are published.
+### First observed paired comparison (hosted, 2026-11-09)
+
+The [GitHub Actions benchmark run](https://github.com/zgcharaf/ENV-Guard/actions/runs/42656664277) passed on Ubuntu 24.04 / Python 3.12 and uploaded its [machine-readable evidence](https://github.com/zgcharaf/ENV-Guard/actions/runs/42656664277/artifacts/13691748107).
+
+- Eleven controlled lab cases executed; eight of eight injected labels matched, and all three controls had no environmental attribution.
+- On the **two predefined metadata-related cases**, `pip check` returned nonzero on 2/2 and `uv pip check` returned nonzero on 2/2.
+- The controlled lab's wall-clock was 26.76 seconds in this CI run. This is not an across-tool timing result.
+- Neither checker supplied a root-cause attribution comparable to EnvGuard, and no independent blind root-cause study or engineer-time benchmark has been performed.
+
+Record case-level result JSON and command versions rather than representing these findings as competitive superiority. Artifact retention is limited; refer to the pinned workflow run and copy sanitized evidence into a properly reviewed permanent data release before publication of a formal report.
 
 ## 4. Independent holdout protocol
 

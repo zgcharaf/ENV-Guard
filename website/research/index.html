@@ -36,7 +36,7 @@
 <p class="doc-lead">A reproducible evaluation of Python CI failure diagnostics—with an explicit separation between synthetic fault injection, hosted CI evidence, and independent field accuracy.</p>
 <div class="abstract" id="abstract"><span class="abstract-title">Abstract</span>
 <p>EnvGuard CI has demonstrated exact matches to known developer-injected fault labels in a controlled offline laboratory. It has also operated on hosted CI runners, including a deliberately incorrect Python interpreter. These observations support further evaluation; they do not establish general causal accuracy, superiority over package managers, or enterprise readiness. This page reports what has been measured, explains how to reproduce it, and defines the independent benchmark required before broader performance claims.</p></div>
-<div class="note"><p><strong>Claim discipline.</strong> All published numerical outcomes below originate from <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/examples/controlled-benchmark.json">the committed sample run</a>. No competitor benchmark has been executed and published yet.</p></div>
+<div class="note"><p><strong>Claim discipline.</strong> Controlled label counts are derived from the <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/examples/controlled-benchmark.json">committed sample</a> and confirmed by a <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42656664277">hosted replication</a>. Metadata-check exit signals have been measured for <code>pip check</code> and <code>uv pip check</code>; no blind comparative root-cause accuracy or investigation-time advantage has been established.</p></div>
 
 <section id="evidence">
 <h2>1. Evidence hierarchy</h2>
@@ -45,7 +45,7 @@
 <tr><td>Hosted GitHub Actions test runs</td><td>Yes</td><td>Workflows ran and passed their particular checks</td></tr>
 <tr><td>Hosted GitLab synthetic incident</td><td>Yes, historical pilot</td><td>Wrong-interpreter symptom, corresponding EnvGuard hypothesis, retained artifacts</td></tr>
 <tr><td>Independent historical failures</td><td>Not yet</td><td>No field accuracy estimate</td></tr>
-<tr><td>Measured head-to-head study</td><td>Not yet</td><td>No relative accuracy or speed claim</td></tr>
+<tr><td>Paired metadata-check run</td><td>Yes, controlled</td><td>Nonzero exits on predefined metadata failures; not exact causal attribution</td></tr><tr><td>Independent head-to-head incident study</td><td>Not yet</td><td>No relative root-cause accuracy or speed claim</td></tr>
 </tbody></table>
 <p>Cases with author-known injected labels are useful for regression tests, but they provide a biased estimate of performance on unseen incidents. For a stronger claim, fault labels must be verified without relying on EnvGuard's diagnosis.</p>
 </section>
@@ -111,9 +111,13 @@
 <tr><td>Detect mismatch of intended vs directly executed Python</td><td>Supported when execution evidence is explicit</td><td>Not its stated objective</td><td>Not its stated objective</td></tr>
 <tr><td>Classify native loader errors</td><td>Selected signatures and Linux checks</td><td>Not its stated objective</td><td>Not its stated objective</td></tr>
 <tr><td>Generate structured CI incident dossier</td><td>Supported</td><td>Not its stated objective</td><td>Not its stated objective</td></tr>
-<tr><td>Measured performance in a matched comparison</td><td colspan="3"><em>Not yet published</em></td></tr>
+<tr><td>Same-environment metadata checks (2 predefined cases)</td><td>2/2 injected categories matched in lab</td><td>2/2 nonzero exits</td><td>2/2 nonzero exits</td></tr><tr><td>Independent causal accuracy and human time savings</td><td colspan="3"><em>Not measured</em></td></tr>
 </tbody></table>
 <p>The accompanying <a href="https://github.com/zgcharaf/ENV-Guard/blob/main/research/compare_tools.py">comparison runner</a> records exit statuses, tool versions and timings on exactly the same lab virtualenvs. It focuses on the metadata-related subcases when discussing metadata-check behavior. A nonzero checker exit status is a <em>signal</em>, not an exact failure-cause label.</p>
+<div class="definition"><span class="definition-label">First hosted paired audit — 9 November 2026</span>
+<p>On <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42656664277">GitHub Actions run 42656664277</a> (Ubuntu 24.04, Python 3.12), the controlled lab again completed all 11 cases and exactly matched 8/8 injected fault labels. For the <strong>two predefined package-metadata cases</strong>, <code>python -m pip check</code> returned nonzero on 2/2 and <code>uv pip check --python</code> returned nonzero on 2/2. These are metadata-consistency signals, <strong>not</strong> exact explanations of the failed jobs.</p>
+</div>
+<p>The full machine-readable <a href="https://github.com/zgcharaf/ENV-Guard/actions/runs/42656664277/artifacts/13691748107">controlled benchmark artifact</a> contains the per-case statuses, tool versions and hashed outputs; it is retained for 30 days. The observed lab wall-clock time on this runner was 26.76 seconds, which is not comparable to a checker invocation time or developer investigation time.</p>
 </section>
 
 <section id="protocol">
