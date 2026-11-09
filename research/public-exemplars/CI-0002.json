@@ -43,5 +43,6 @@
     "Full third-party application tests are not executed by EnvGuard's minimal-pair replay.",
     "Reproducing the pair with PyPI metadata is not equivalent to reproducing original exact dependency closure, OS, or CI job.",
     "Do not score this public development case as held-out independent attribution accuracy."
-  ]
+  ],
+  "hosted_replay_observation": "https://github.com/zgcharaf/ENV-Guard/blob/main/research/public-exemplars/CI-0002-observed-2026-11-09.json"
 }

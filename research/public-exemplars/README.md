@@ -9,6 +9,8 @@ already been visible to EnvGuard developers.
 | --- | --- | --- | --- |
 | [CI-0002](CI-0002.json) | pip resolver conflict between pytest 9.0.3 and pytest-asyncio 1.2.0 | [Original failed CI](https://github.com/cvsz/zbase/actions/runs/42434561391), [fix PR](https://github.com/cvsz/zbase/pull/24), [post-fix CI](https://github.com/cvsz/zbase/actions/runs/42434951881) | [Hosted minimal-pair replay](https://github.com/zgcharaf/ENV-Guard/actions/runs/42664192392) |
 
+The [permanent hosted observation JSON](CI-0002-observed-2026-11-09.json) is derived from the successful workflow job output and stores status, fingerprints of output, EnvGuard hypothesis and the source run URL, without raw logs. It remains a disclosed development case.
+
 ## Strict boundaries
 
 - `holdout_eligible=false` is a **permanent** flag for disclosed cases.

@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0",
+  "type": "hosted_public_development_replay_observation",
+  "case_id": "CI-0002",
+  "observed_date": "2026-11-09",
+  "git_commit": "14118a603dc0c83869f744aafcd5febae05743a0",
+  "github_run_id": 42664192392,
+  "github_run_url": "https://github.com/zgcharaf/ENV-Guard/actions/runs/42664192392",
+  "hosted_job_id": 129323347946,
+  "archived_artifact_url": "https://github.com/zgcharaf/ENV-Guard/actions/runs/42664192392/artifacts/13694139932",
+  "experimental_scope": "Minimal public PyPI wheel-metadata resolution pair; not full zbase project CI.",
+  "study_role": "public_development_exemplar",
+  "is_independent_blind_test": false,
+  "holdout_eligible": false,
+  "observed_stdout_summary": {
+    "status": "minimal_pair_reproduced",
+    "study_role": "public_development_exemplar",
+    "outcomes": {
+      "conflict": {
+        "case": "conflict",
+        "exit_code": 1,
+        "has_resolution_impossible": true,
+        "has_conflict_explanation": true,
+        "combined_output_sha256": "c37f8ec4d5d62819ba58d42803457714d56a22cdc1910d231f410f214c5c4aa1",
+        "envguard_observed_failure": "resolver_conflict",
+        "envguard_hypothesis": "DEPENDENCY_RESOLUTION_CONFLICT",
+        "envguard_confidence": "medium"
+      },
+      "corrected": {
+        "case": "corrected",
+        "exit_code": 0,
+        "has_resolution_impossible": false,
+        "has_conflict_explanation": false,
+        "combined_output_sha256": "3eec0969cde0cb426a791aa52d9a90c2c1994debdd47628f858359a87afd1e09",
+        "envguard_observed_failure": null,
+        "envguard_hypothesis": null,
+        "envguard_confidence": null
+      }
+    },
+    "summary": "research-results/public-replay/replay-summary.json"
+  }
+}
